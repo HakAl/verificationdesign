@@ -43,6 +43,8 @@ Disposition is held. Do not fold this yet. Treat it as corroboration material fo
 
 Per the fold-in bar, the LLM-transfer effectiveness claims need independent corroboration in an LLM setting before folding. The classic human-factors claims are strong but domain-distant. Held, not expand-on this cycle.
 
+2026-08-15 update: posture changed to expand-on, still held. Operator direction: operator attention is a rate limiter in the delegation pipeline, and the "human at the ends gives maximum quality" assumption is conditional on operator skill, not the general case. Registered `operator_attention` under `expand_on` in `research/scouts/config.json` to hunt oversight-bandwidth, deferral, and overreliance work in LLM settings, which is the corroboration this note's fold-in bar asks for. Fold decision unchanged.
+
 ## Claims Needing Human Review
 
 Whether grade B rather than C is right given the domain-transfer gap from human-factors monitoring to LLM-mediated review.
