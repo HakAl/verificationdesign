@@ -2,7 +2,10 @@
 
 This additive accumulator gathers reviewed evidence under claims rather than sources. It has no authority over `verification_design.md` and does not modify or replace canonical material. Status describes the evidence currently recorded here; it does not prescribe action. Claims remain scoped to the settings described in their reviewed notes.
 
-Date: 2026-08-19
+Section headings are filing locations for new evidence, not commentary on the principles they mirror. A principle's own supporting evidence lives in `verification_design.md`; a claim filed under a section sits beneath that principle and neither supports nor qualifies it. An empty section means that principle has no unfolded evidence here, not that it is unsupported.
+
+Seeded: 2026-08-19
+Header clarified: 2026-08-23
 
 ## 1. External Signals Over Self-Review
 
