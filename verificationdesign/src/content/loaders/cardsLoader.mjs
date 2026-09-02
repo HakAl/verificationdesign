@@ -19,12 +19,12 @@ const CATEGORY_LABEL = {
   'orchestration': 'Orchestration',
 };
 
-function extractTitle(content) {
+export function extractTitle(content) {
   const match = content.match(/^#\s+(.+)$/m);
   return match ? match[1].trim() : null;
 }
 
-function extractIntent(content) {
+export function extractIntent(content) {
   const match = content.match(/##\s+Intent\s*\n+([\s\S]*?)(?=\n##\s|\n*$)/);
   if (!match) return null;
   const paragraph = match[1]
@@ -38,13 +38,13 @@ function extractIntent(content) {
   return sentence ? sentence[0] : paragraph;
 }
 
-function extractCategory(content) {
+export function extractCategory(content) {
   const match = content.match(/^\*\((\w+ Pattern)\)\*\s*$/m);
   if (!match) return null;
   return CATEGORY_FROM_SUBTITLE[match[1]] || null;
 }
 
-function extractRelated(content) {
+export function extractRelated(content) {
   const match = content.match(/##\s+Related Patterns\s*\n([\s\S]*?)(?=\n##\s|\n*$)/);
   if (!match) return [];
   const block = match[1];

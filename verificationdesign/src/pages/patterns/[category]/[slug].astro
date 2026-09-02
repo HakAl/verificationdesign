@@ -1,27 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import CardLayout from '../../../layouts/CardLayout.astro';
-
-// Nora's canonical reading order for prev/next nav.
-const READING_ORDER = [
-  'context-and-state/constitution',
-  'context-and-state/guardrail-decorator',
-  'context-and-state/causal-tag',
-  'context-and-state/trajectory-cursor',
-  'context-and-state/state-baseline',
-  'verification/executable-analog',
-  'verification/blind-oracle',
-  'verification/comparator',
-  'verification/delta',
-  'verification/judge-harness',
-  'verification/admissibility-gate',
-  'orchestration/cross-family',
-  'orchestration/adversary',
-  'orchestration/debate',
-  'orchestration/escalation-chain',
-  'orchestration/backpressure',
-  'orchestration/tool-adapter',
-];
+import { READING_ORDER } from '../../../lib/reading-order.mjs';
 
 export async function getStaticPaths() {
   const cards = await getCollection('patterns');
@@ -48,6 +28,12 @@ const next = i >= 0 && i < ordered.length - 1 ? ordered[i + 1] : null;
 const { Content, headings } = await render(card);
 ---
 
-<CardLayout entry={card} headings={headings} prev={prev} next={next}>
+<CardLayout
+  entry={card}
+  headings={headings}
+  prev={prev}
+  next={next}
+  markdownPath={`/patterns/${card.data.category}/${card.data.slug}.md`}
+>
   <Content />
 </CardLayout>

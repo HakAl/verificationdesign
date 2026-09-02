@@ -44,6 +44,8 @@ For `ai-design-patterns/`, run the local pattern linter when editing cards. It i
 
 Use `npm run dev` inside `verificationdesign/` for local UX work. Use browser automation, screenshots, and accessibility checks for UI changes when available. Treat visual approval by the model as insufficient; verify layout, navigation, and accessibility through external signals.
 
+Agent-readable markdown twins, `llms.txt`, and `llms-full.txt` are generated into `verificationdesign/dist/` after the Astro build. Run `npm run build:twins` to generate them and `npm run check:twins` to verify them. These artifacts are derived from `verification_design.md`, the pattern-card sources, and site metadata: never hand-edit generated twins. The development server does not serve them; they are available only after the post-build generator runs.
+
 Before site work is considered done, run:
 
 1. `npm run build`
@@ -67,6 +69,8 @@ Deployment target is Cloudflare Pages with root directory `verificationdesign`, 
 - `python3 scripts/rank_triage.py --anchors research/triage/anchors.md --validate-anchors`: validate ranking anchors.
 - `python3 ai-design-patterns/scripts/lint_patterns.py`: lint migrated AI design pattern cards.
 - `cd verificationdesign && npm run dev`: run the website locally.
+- `cd verificationdesign && npm run build:twins`: generate markdown twins and agent discovery files after an Astro build.
+- `cd verificationdesign && npm run check:twins`: independently verify generated markdown twins and discovery files.
 - `cd verificationdesign && npm run verify`: build, type-check, lint cards, and run the accessibility smoke check.
 
 `scripts/scout.py` harvests arXiv via the OAI-PMH `ListRecords` interface serially with a fixed 10 second delay between requests, stops immediately on `429`, backs off on `503` and timeouts, caps raw OAI pages per category, and exits non-zero rather than writing partial scout output after a request failure. OAI-PMH windows track metadata datestamps, not original submission dates; per-entry Created, Updated, and OAI datestamp fields let triage tell new submissions, re-versions, and metadata corrections apart.

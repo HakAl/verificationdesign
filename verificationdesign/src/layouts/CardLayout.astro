@@ -5,7 +5,7 @@ import CardNav from '../components/CardNav.astro';
 import { getUi } from '../i18n/ui';
 import { cardSourceUrl, REPO_ISSUES_URL } from '../lib/repo';
 
-const { entry, headings, prev, next } = Astro.props;
+const { entry, headings, prev, next, markdownPath } = Astro.props;
 const data = entry.data;
 const t = getUi();
 
@@ -47,7 +47,7 @@ const cardSchema = JSON.stringify([
 ]);
 ---
 
-<BaseLayout title={data.title} description={description} updated={data.updated}>
+<BaseLayout title={data.title} description={description} updated={data.updated} markdownPath={markdownPath}>
   <article class="card-page">
     <script is:inline type="application/ld+json" set:html={cardSchema} />
     <Breadcrumb items={breadcrumb} />
