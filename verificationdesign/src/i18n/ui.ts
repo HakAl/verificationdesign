@@ -38,6 +38,9 @@ export const ui = {
       updated: 'Patterns updated',
       updatedFallback: 'Patterns updated recently.',
       repo: 'Source, checks, and history on GitHub',
+      agents: 'For agents:',
+      agentIndex: 'index',
+      fullCorpus: 'full corpus',
     },
   },
 } as const;

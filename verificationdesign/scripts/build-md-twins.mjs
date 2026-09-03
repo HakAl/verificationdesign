@@ -7,6 +7,7 @@ import {
   extractTitle,
 } from '../src/content/loaders/cardsLoader.mjs';
 import { READING_ORDER } from '../src/lib/reading-order.mjs';
+import { FAILURE_MAP } from '../src/lib/failure-map.mjs';
 import { collectReferences } from '../src/lib/references.ts';
 import { REPO_URL } from '../src/lib/repo.ts';
 
@@ -25,6 +26,37 @@ const CATEGORY_LABELS = {
 function normalizeBody(value) {
   return `${value.replace(/\r\n/g, '\n').replace(/\n*$/, '')}\n`;
 }
+
+function extractSection(body, heading) {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = body.match(new RegExp(`^## ${escaped}\\s*\\n([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, 'm'));
+  return match?.[1]?.trim().replace(/\s+/g, ' ') ?? '';
+}
+
+function sortKeys(value) {
+  if (Array.isArray(value)) return value.map(sortKeys);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortKeys(value[key])]));
+  }
+  return value;
+}
+
+const failureSection = [
+  '## Start from the failure',
+  '',
+  'First the pain, then the pattern. Each failure lists the patterns to reach for, closest fit first.',
+  '',
+  ...FAILURE_MAP.flatMap((entry) => [
+    `### ${entry.failure}`,
+    '',
+    entry.shape,
+    '',
+    ...entry.links.map((link) => `- [${link.label}](${SITE}${link.href.replace(/\/$/, '.md')})`),
+    '',
+  ]),
+  `If the failure is still unclear, start with [Constitution](${SITE}/patterns/context-and-state/constitution.md). Most verification failures become easier to diagnose once the system has an explicit answer to what is being checked.`,
+  '',
+];
 
 function quote(value) {
   return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
@@ -126,6 +158,7 @@ const indexBody = [
   '',
   ...orderedCards.map((card) => `- [${card.title}](${card.markdownUrl}): ${card.intent}`),
   '',
+  ...failureSection,
 ].join('\n');
 await emit('patterns.md', `${frontmatter({
   title: 'Patterns',
@@ -183,6 +216,18 @@ const llms = [
   '',
   'Content is licensed under CC BY 4.0. Every `.md` link below is the source markdown for the matching HTML page.',
   '',
+  '## Available representations',
+  '',
+  `- [llms.txt](${SITE}/llms.txt): This index. Fetch first.`,
+  `- [llms-full.txt](${SITE}/llms-full.txt): The full corpus in one plain-text file: principles, all cards in reading order, references. Fetch when you need everything.`,
+  `- [catalog.json](${SITE}/catalog.json): Routing manifest: one record per card with title, intent, URLs, related cards, determinism move, observable signal, plus the failure map. Fetch to pick one card without loading the corpus.`,
+  `- [patterns.md](${SITE}/patterns.md): Pattern index with the failure map. Fetch to choose a pattern from a symptom.`,
+  `- [context-and-state.md](${SITE}/patterns/context-and-state.md): Index of the Context and State cards.`,
+  `- [verification.md](${SITE}/patterns/verification.md): Index of the Verification cards.`,
+  `- [orchestration.md](${SITE}/patterns/orchestration.md): Index of the Orchestration cards.`,
+  `- [principles.md](${SITE}/principles.md): The canonical principles document.`,
+  `- [references.md](${SITE}/references.md): Deduplicated sources.`,
+  '',
   '## Principles',
   '',
   `- [Verification Design Principles](${SITE}/principles.md): The canonical principles document.`,
@@ -226,6 +271,40 @@ const full = fullBlocks.map((block) => [
   '',
 ].join('\n')).join('\n');
 await emit('llms-full.txt', full);
+
+const catalog = {
+  generated: true,
+  license: LICENSE,
+  site: SITE,
+  principles: {
+    html_url: `${SITE}/principles/`,
+    markdown_url: `${SITE}/principles.md`,
+    source_url: RAW_PRINCIPLES_URL,
+  },
+  cards: orderedCards.map((card) => ({
+    id: card.id,
+    category: card.category,
+    title: card.title,
+    intent: card.intent,
+    html_url: card.canonical,
+    markdown_url: card.markdownUrl,
+    source_url: `${REPO_URL.replace('https://github.com/', 'https://raw.githubusercontent.com/')}/main/${card.source}`,
+    related: card.relatedNames.map((rawTitle) => {
+      const title = rawTitle.replace(/:$/, '');
+      const target = byTitle.get(title);
+      if (!target) throw new Error(`${card.file} names unknown related pattern: ${title}`);
+      return target.id;
+    }),
+    determinism_move: extractSection(card.body, 'Determinism Move'),
+    observable_signal: extractSection(card.body, 'Observable Signal'),
+  })),
+  failures: FAILURE_MAP.map((entry) => ({
+    failure: entry.failure,
+    shape: entry.shape,
+    cards: entry.links.map((link) => link.href.replace(/^\/patterns\//, '').replace(/\/$/, '')),
+  })),
+};
+await emit('catalog.json', `${JSON.stringify(sortKeys(catalog), null, 2)}\n`);
 
 const headerRules = twins.map((twin) => [
   twin.path,

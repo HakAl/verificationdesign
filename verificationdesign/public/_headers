@@ -16,3 +16,6 @@
 
 /llms-full.txt
   Content-Type: text/plain; charset=utf-8
+
+/catalog.json
+  Content-Type: application/json; charset=utf-8

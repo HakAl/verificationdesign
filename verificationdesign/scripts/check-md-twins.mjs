@@ -128,6 +128,7 @@ for (const file of (await readdir(CARDS_DIR)).filter((name) => name.endsWith('.m
     file,
     source: `ai-design-patterns/cards/${file}`,
     sourceBody: normalizeBody(sourceBody),
+    intent: (sourceBody.match(/^## Intent\s*\n+([^\n]+)/m)?.[1] ?? '').replace(/[*`]/g, '').trim().replace(/\s+/g, ' '),
   });
 }
 const byId = new Map(cards.map((card) => [card.id, card]));
@@ -215,12 +216,16 @@ for (const line of llmsLines) {
 const internalMarkdown = llmsLinks
   .filter((url) => url.startsWith(`${SITE}/`) && url.endsWith('.md'))
   .map((url) => url.slice(SITE.length + 1));
-const expectedLlms = new Set(['principles.md', 'references.md', ...cardPaths]);
+const expectedLlms = new Set([...FIXED, ...cardPaths]);
 for (const path of expectedLlms) {
   if (!internalMarkdown.includes(path)) fail(`llms.txt: omitted content twin ${path}`);
 }
 for (const path of internalMarkdown) {
   if (!expected.has(path)) fail(`llms.txt: link does not exist in dist: ${path}`);
+}
+for (const url of [`${SITE}/llms-full.txt`, `${SITE}/catalog.json`, `${SITE}/patterns.md`,
+  `${SITE}/patterns/context-and-state.md`, `${SITE}/patterns/verification.md`, `${SITE}/patterns/orchestration.md`]) {
+  if (!llmsLinks.includes(url)) fail(`llms.txt: omitted required representation ${url}`);
 }
 const githubLinks = llmsLinks.filter((url) => /github(usercontent)?\.com/.test(url));
 for (const url of githubLinks) {
@@ -288,6 +293,131 @@ for (const rule of headerRules) {
   if (!expected.has(rule.path)) fail(`_headers: canonical rule for non-twin ${rule.path}`);
 }
 console.log(`Check 10 canonical headers: expected=${expected.size} found=${headerRules.length} unexpected=${headerRules.filter((rule) => !expected.has(rule.path)).length}`);
+
+function decodeHtml(value) {
+  return value.replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+}
+
+function sectionText(body, heading) {
+  const start = body.indexOf(`## ${heading}\n`);
+  if (start < 0) return '';
+  const contentStart = start + heading.length + 4;
+  const end = body.indexOf('\n## ', contentStart);
+  return body.slice(contentStart, end < 0 ? undefined : end).trim().replace(/\s+/g, ' ');
+}
+
+function sorted(value) {
+  if (Array.isArray(value)) return value.map(sorted);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sorted(value[key])]));
+  return value;
+}
+
+const homeHtml = decodeHtml(await readFile(join(DIST, 'index.html'), 'utf8'));
+const patternsHtml = decodeHtml(await readFile(join(DIST, 'patterns/index.html'), 'utf8'));
+let uniqueComparisons = 0;
+let uniqueMismatches = 0;
+for (const html of [homeHtml, patternsHtml]) {
+  for (const card of cards) {
+    uniqueComparisons += 1;
+    const count = html.split(card.intent).length - 1;
+    if (count !== 1) { uniqueMismatches += 1; fail(`intent uniqueness: ${card.id} occurs ${count} times`); }
+  }
+}
+console.log(`Check 12 intent uniqueness: pages=2 comparisons=${uniqueComparisons} mismatches=${uniqueMismatches}`);
+
+const compactPatternsHtml = patternsHtml.replace(/>\s+</g, '><');
+const chooserMatch = compactPatternsHtml.match(/<div class="chooser-list">([\s\S]*?)<\/div><p class="chooser-footer">/);
+const htmlFailures = [];
+for (const match of (chooserMatch?.[1] ?? '').matchAll(/<section class="chooser-card"><h3>(.*?)<\/h3><p>(.*?)<\/p><ul role="list">([\s\S]*?)<\/ul><\/section>/g)) {
+  htmlFailures.push({
+    failure: match[1], shape: match[2],
+    links: [...match[3].matchAll(/<li><a href="([^"]+)">(.*?)<\/a><\/li>/g)].map((link) => ({ href: link[1], label: link[2] })),
+  });
+}
+const failureMarkdown = (parsed.get('patterns.md')?.body ?? '').split('\n## Start from the failure\n')[1] ?? '';
+const mdFailures = [...failureMarkdown.matchAll(/### ([^\n]+)\n\n([^\n]+)\n\n([\s\S]*?)(?=\n### |\nIf the failure)/g)].map((match) => ({
+  failure: match[1], shape: match[2],
+  links: [...match[3].matchAll(/^- \[([^\]]+)\]\(([^)]+)\)$/gm)].map((link) => ({ label: link[1], href: link[2] })),
+}));
+const predictedFailures = htmlFailures.map((entry) => ({ ...entry, links: entry.links.map((link) => ({ label: link.label, href: `${SITE}${link.href.replace(/\/$/, '.md')}` })) }));
+if (JSON.stringify(mdFailures) !== JSON.stringify(predictedFailures)) fail('patterns.md: failure section differs from built HTML chooser');
+console.log(`Check 13 failure-section parity: html_failures=${htmlFailures.length} markdown_failures=${mdFailures.length} html_links=${htmlFailures.flatMap((entry) => entry.links).length}`);
+
+let plainAlternates = 0;
+let plainAlternateMismatches = 0;
+for (const htmlPath of htmlFiles) {
+  const found = [...(await readFile(htmlPath, 'utf8')).matchAll(/<link\s+rel="describedby"\s+href="([^"]+)"\s+title="llms\.txt"\s*\/?>/g)].map((match) => match[1]);
+  plainAlternates += found.length;
+  const rel = relative(DIST, htmlPath).split(sep).join('/');
+  const wanted = rel === 'index.html' ? [`${SITE}/llms.txt`] : [];
+  if (JSON.stringify(found) !== JSON.stringify(wanted)) { plainAlternateMismatches += 1; fail(`${rel}: wrong llms.txt alternate`); }
+}
+console.log(`Check 14 homepage llms.txt link: links=${plainAlternates} mismatched_pages=${plainAlternateMismatches}`);
+
+const principlesSource = normalizeBody(await readFile(join(REPO, 'verification_design.md'), 'utf8'));
+const referencesTwin = parsed.get('references.md');
+const expectedFullBlocks = [
+  { canonical: `${SITE}/principles/`, source: 'verification_design.md', body: principlesSource },
+  ...ORDER.map((id) => { const card = byId.get(id); return { canonical: `${SITE}/patterns/${id}/`, source: card.source, body: card.sourceBody }; }),
+  { canonical: `${SITE}/references/`, source: 'generated', body: normalizeBody(referencesTwin?.body ?? '') },
+];
+const expectedFull = normalizeBody(expectedFullBlocks.map((block) => ['---', `Canonical: ${block.canonical}`, `Source: ${block.source}`, '', block.body.replace(/\n$/, ''), ''].join('\n')).join('\n'));
+if (normalizeBody(fullText) !== expectedFull) fail('llms-full.txt: exact normalized bytes differ');
+console.log(`Check 15 llms-full.txt bytes: blocks_compared=${expectedFullBlocks.length} bytes=${Buffer.byteLength(expectedFull)} equal=${normalizeBody(fullText) === expectedFull}`);
+
+const categoryLabels = { 'context-and-state': 'Context and State Patterns', verification: 'Verification Patterns', orchestration: 'Orchestration Patterns' };
+const cardLine = (card) => `- [${card.title}](${SITE}/patterns/${card.category}/${card.slug}.md): ${card.intent}`;
+const expectedLlmsText = [
+  '# Verification Design', '',
+  "> Sourced principles and executable, stdlib-only Python pattern cards for verifying agent work: designing evals, checking tool-use output, and replacing self-review with external signals. Use when an agent must check its own or another agent's work.", '',
+  'Content is licensed under CC BY 4.0. Every `.md` link below is the source markdown for the matching HTML page.', '',
+  '## Available representations', '',
+  `- [llms.txt](${SITE}/llms.txt): This index. Fetch first.`,
+  `- [llms-full.txt](${SITE}/llms-full.txt): The full corpus in one plain-text file: principles, all cards in reading order, references. Fetch when you need everything.`,
+  `- [catalog.json](${SITE}/catalog.json): Routing manifest: one record per card with title, intent, URLs, related cards, determinism move, observable signal, plus the failure map. Fetch to pick one card without loading the corpus.`,
+  `- [patterns.md](${SITE}/patterns.md): Pattern index with the failure map. Fetch to choose a pattern from a symptom.`,
+  `- [context-and-state.md](${SITE}/patterns/context-and-state.md): Index of the Context and State cards.`,
+  `- [verification.md](${SITE}/patterns/verification.md): Index of the Verification cards.`,
+  `- [orchestration.md](${SITE}/patterns/orchestration.md): Index of the Orchestration cards.`,
+  `- [principles.md](${SITE}/principles.md): The canonical principles document.`,
+  `- [references.md](${SITE}/references.md): Deduplicated sources.`, '',
+  '## Principles', '', `- [Verification Design Principles](${SITE}/principles.md): The canonical principles document.`,
+  `- [Raw principles source](${RAW_FIXTURE}main/verification_design.md): The repository source file, raw markdown.`, '',
+  ...Object.entries(categoryLabels).flatMap(([category, title]) => [`## ${title}`, '', ...ORDER.map((id) => byId.get(id)).filter((card) => card.category === category).map(cardLine), '']),
+  '## References', '', `- [References](${SITE}/references.md): Deduplicated sources and the pages that cite them.`, '',
+  '## Source', '', `- [Repository](${REPO_FIXTURE}): Source repository.`, '- [License](https://creativecommons.org/licenses/by/4.0/): CC BY 4.0.', '',
+  '## Optional', '', `- [About](${SITE}/about/): A human-facing introduction for operators.`, '',
+].join('\n');
+if (normalizeBody(llmsText) !== normalizeBody(expectedLlmsText)) fail('llms.txt: exact normalized bytes differ');
+console.log(`Check 16 llms.txt bytes: card_lines=${cards.length} bytes=${Buffer.byteLength(normalizeBody(llmsText))} equal=${normalizeBody(llmsText) === normalizeBody(expectedLlmsText)}`);
+
+const ordered = ORDER.map((id) => byId.get(id));
+const expectedFlat = ['# Patterns', '', ...ordered.map(cardLine), ''];
+const expectedFailureLines = ['## Start from the failure', '', 'First the pain, then the pattern. Each failure lists the patterns to reach for, closest fit first.', '', ...predictedFailures.flatMap((entry) => [`### ${entry.failure}`, '', entry.shape, '', ...entry.links.map((link) => `- [${link.label}](${link.href})`), '']), `If the failure is still unclear, start with [Constitution](${SITE}/patterns/context-and-state/constitution.md). Most verification failures become easier to diagnose once the system has an explicit answer to what is being checked.`, ''];
+const expectedIndexes = new Map([['patterns.md', [...expectedFlat, ...expectedFailureLines].join('\n')], ...Object.entries(categoryLabels).map(([category, title]) => [`patterns/${category}.md`, [`# ${title}`, '', ...ordered.filter((card) => card.category === category).map(cardLine), ''].join('\n')])]);
+let indexMismatches = 0;
+for (const [path, body] of expectedIndexes) if (normalizeBody(parsed.get(path)?.body ?? '') !== normalizeBody(body)) { indexMismatches += 1; fail(`${path}: exact normalized bytes differ`); }
+console.log(`Check 17 index twin bytes: files=${expectedIndexes.size} mismatches=${indexMismatches}`);
+
+const expectedCatalog = sorted({ generated: true, license: 'CC BY 4.0', site: SITE,
+  principles: { html_url: `${SITE}/principles/`, markdown_url: `${SITE}/principles.md`, source_url: `${RAW_FIXTURE}main/verification_design.md` },
+  cards: ordered.map((card) => ({ id: card.id, category: card.category, title: card.title, intent: card.intent,
+    html_url: `${SITE}/patterns/${card.id}/`, markdown_url: `${SITE}/patterns/${card.id}.md`, source_url: `${RAW_FIXTURE}main/${card.source}`,
+    related: [...(card.sourceBody.match(/##\s+Related Patterns\s*\n([\s\S]*?)(?=\n##\s|\n*$)/)?.[1] ?? '').matchAll(/\*\*([^*]+)\*\*/g)].map((match) => byTitle.get(match[1].trim().replace(/:$/, ''))?.id),
+    determinism_move: sectionText(card.sourceBody, 'Determinism Move'), observable_signal: sectionText(card.sourceBody, 'Observable Signal') })),
+  failures: htmlFailures.map((entry) => ({ failure: entry.failure, shape: entry.shape, cards: entry.links.map((link) => link.href.replace(/^\/patterns\//, '').replace(/\/$/, '')) })),
+});
+const expectedCatalogText = `${JSON.stringify(expectedCatalog, null, 2)}\n`;
+const catalogText = (await readFile(join(DIST, 'catalog.json'), 'utf8')).replace(/\r\n/g, '\n');
+if (catalogText !== expectedCatalogText) fail('catalog.json: canonical bytes differ');
+console.log(`Check 18 catalog.json bytes: cards=${expectedCatalog.cards.length} failures=${expectedCatalog.failures.length} bytes=${Buffer.byteLength(catalogText)} equal=${catalogText === expectedCatalogText}`);
+
+const referenceMarkdownPairs = [...(referencesTwin?.body ?? '').matchAll(/^- \[([^\]]+)\]\(([^)]+)\):/gm)].map((match) => [match[1], match[2]]);
+const referencesHtml = decodeHtml(await readFile(join(DIST, 'references/index.html'), 'utf8')).replace(/>\s+</g, '><');
+const referenceHtmlPairs = [...referencesHtml.matchAll(/<li><a href="([^"]+)">(.*?)<\/a><span class="reference-sources">/g)].map((match) => [match[2], match[1]]);
+if (JSON.stringify(referenceMarkdownPairs) !== JSON.stringify(referenceHtmlPairs)) fail('references.md: labels and links differ from HTML');
+console.log(`Check 19 references parity: markdown=${referenceMarkdownPairs.length} html=${referenceHtmlPairs.length} equal=${JSON.stringify(referenceMarkdownPairs) === JSON.stringify(referenceHtmlPairs)}`);
 
 if (errors.length) {
   for (const error of errors) console.error(`FAIL: ${error}`);

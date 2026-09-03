@@ -9,6 +9,8 @@
     "build": "astro build",
     "build:twins": "node scripts/build-md-twins.mjs",
     "check:twins": "node scripts/check-md-twins.mjs",
+    "smoke:live": "node scripts/smoke-live.mjs",
+    "measure:cards": "node scripts/measure-card-heights.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint:cards": "python3 ../ai-design-patterns/scripts/lint_patterns.py",

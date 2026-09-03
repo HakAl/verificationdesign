@@ -44,7 +44,7 @@ For `ai-design-patterns/`, run the local pattern linter when editing cards. It i
 
 Use `npm run dev` inside `verificationdesign/` for local UX work. Use browser automation, screenshots, and accessibility checks for UI changes when available. Treat visual approval by the model as insufficient; verify layout, navigation, and accessibility through external signals.
 
-Agent-readable markdown twins, `llms.txt`, and `llms-full.txt` are generated into `verificationdesign/dist/` after the Astro build. Run `npm run build:twins` to generate them and `npm run check:twins` to verify them. These artifacts are derived from `verification_design.md`, the pattern-card sources, and site metadata: never hand-edit generated twins. The development server does not serve them; they are available only after the post-build generator runs.
+Agent-readable markdown twins, `llms.txt`, `llms-full.txt`, and `catalog.json` are generated into `verificationdesign/dist/` after the Astro build. Run `npm run build:twins` to generate them and `npm run check:twins` to verify them. These artifacts are derived from `verification_design.md`, the pattern-card sources, and site metadata: never hand-edit them. `verificationdesign/src/lib/failure-map.mjs` is the single source for failure routing in the HTML page and generated artifacts. The development server does not serve generated artifacts; they are available only after the post-build generator runs. After deployment, run `npm run smoke:live` to check the live edge. Run `npm run measure:cards` against a running preview after any change to `CategoryGrid.astro` or the card CSS; optional screenshots belong in the gitignored `verificationdesign/local/` directory.
 
 Before site work is considered done, run:
 

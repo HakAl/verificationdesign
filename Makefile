@@ -1,4 +1,4 @@
-.PHONY: help check verify verify-local patterns site site-build site-check site-lint-cards site-a11y site-dev site-preview
+.PHONY: help check verify verify-local patterns site site-build site-check site-lint-cards site-a11y site-dev site-preview site-smoke
 
 SITE_DIR := verificationdesign
 
@@ -15,7 +15,8 @@ help:
 		'  make site-lint-cards  Lint cards through the website npm script' \
 		'  make site-a11y        Run pa11y-ci against built website HTML' \
 		'  make site-dev         Start the website dev server' \
-		'  make site-preview     Preview the built website'
+		'  make site-preview     Preview the built website' \
+		'  make site-smoke       Smoke-test the deployed agent-facing artifacts'
 
 check: site verify
 
@@ -48,3 +49,6 @@ site-dev:
 
 site-preview:
 	cd $(SITE_DIR) && npm run preview
+
+site-smoke:
+	cd $(SITE_DIR) && npm run smoke:live
