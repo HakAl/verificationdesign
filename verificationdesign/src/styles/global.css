@@ -349,12 +349,6 @@ hr {
 }
 .card-list a:hover { border-color: var(--accent); }
 .card-title { font-weight: 600; }
-.card-gloss-stack {
-  display: grid;
-  margin-top: var(--space-1);
-}
-.card-gloss-stack > .card-gloss { grid-area: 1 / 1; margin-top: 0; }
-.card-gloss-ghost { visibility: hidden; }
 .card-gloss {
   display: block;
   font-weight: 400;
@@ -362,6 +356,8 @@ hr {
   line-height: 1.4;
   color: var(--muted);
   margin-top: var(--space-1);
+  min-block-size: 5rem;
+  min-block-size: 4.2lh;
 }
 
 .card-page { max-width: var(--measure-wide); margin: 0 auto; }
@@ -589,6 +585,7 @@ hr {
 }
 
 @media (max-width: 900px) {
+  .card-gloss { min-block-size: 0; }
   .cta-row {
     display: grid;
     grid-template-columns: max-content max-content;

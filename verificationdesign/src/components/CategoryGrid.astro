@@ -40,14 +40,6 @@ const visible = (Object.keys(CATEGORY_INFO) as CategoryKey[]).filter(
 
 const { showCount = true, headingLevel = 'h2' } = Astro.props;
 const Heading = headingLevel;
-
-const longestIntent = cards.reduce(
-  (longest, card) =>
-    card.data.intent && card.data.intent.length > longest.length
-      ? card.data.intent
-      : longest,
-  '',
-);
 ---
 
 <div class="category-grid">
@@ -64,10 +56,7 @@ const longestIntent = cards.reduce(
             <a href={`/patterns/${card.data.category}/${card.data.slug}/`}>
               <span class="card-title">{card.data.title}</span>
               {card.data.intent && (
-                <span class="card-gloss-stack">
-                  <span class="card-gloss">{card.data.intent}</span>
-                  <span class="card-gloss card-gloss-ghost" aria-hidden="true">{longestIntent}</span>
-                </span>
+                <span class="card-gloss">{card.data.intent}</span>
               )}
             </a>
           </li>
