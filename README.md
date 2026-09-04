@@ -8,7 +8,7 @@ Agentic systems fail in a recognizable way: the agent says done, and the work is
 
 ## What is here
 
-- [`verification_design.md`](verification_design.md): nine principles for verification design, kept as append-only research notes. Every empirical claim carries an inline citation and a matching row in the References table. Findings update through dated notes; prior state is never rewritten.
+- [`verification_design.md`](verification_design.md): nine principles for verification design, presented as a curated position paper. Every empirical claim carries an inline citation and a matching row in the References table. New evidence is held in `research/synthesis.md` until folded by the maintainer.
 - [`ai-design-patterns/`](ai-design-patterns/): a catalog of 17 pattern cards in three families (Context and State, Verification, Orchestration). Cards follow the canonical Problem, Forces, and Solution pattern form, with GoF's Intent and Related Patterns. Each card pairs a Pattern with an Antipattern, names the failure it controls, and states the observable signal it produces. Pattern code is Python, standard library only, and must execute.
 - [`verificationdesign/`](verificationdesign/): the Astro site that publishes both. The site reads cards directly from the catalog; there is no second copy of the content.
 - [`research/`](research/): the supply chain for the principles. Mechanical arXiv discovery, first-pass triage, and graded source reviews, in that order, before anything reaches the canonical doc.
@@ -20,7 +20,7 @@ The thesis here is that "looks good" is not verification, so this project does n
 - [`ai-design-patterns/constitution.json`](ai-design-patterns/constitution.json) defines the editorial rules: required card sections, a closed vocabulary for determinism claims, and a banned-words list for vague language.
 - [`ai-design-patterns/scripts/lint_patterns.py`](ai-design-patterns/scripts/lint_patterns.py) fails any card that breaks those rules.
 - [`ai-design-patterns/scripts/run_card_code.py`](ai-design-patterns/scripts/run_card_code.py) executes every card's Pattern code block under a bare Python 3.13 and fails unless a load-bearing assertion actually runs.
-- [`scripts/verify.py`](scripts/verify.py) checks link liveness, citation and reference balance, provenance of every dated update, and that research notes were appended rather than rewritten.
+- [`scripts/verify.py`](scripts/verify.py) checks link liveness, citation and reference balance, provenance of every dated update, and that the synthesis holding area is append-only.
 - CI runs all of the above and refuses to deploy the site on any failure. A deployed site is a passing site by construction.
 
 ## No author brand

@@ -303,7 +303,7 @@ def check_update_provenance(path: Path) -> Check:
     return Check(
         "provenance",
         not failures,
-        f"{len(update_blocks)} dated update note blocks inspected; {len(failures)} failures",
+        f"{path.relative_to(ROOT)}: {len(update_blocks)} dated update note blocks inspected; {len(failures)} failures",
         failures,
     )
 
@@ -378,7 +378,7 @@ def check_triage_notes() -> Check:
 def check_append_only(base_ref: str) -> Check:
     try:
         diff = subprocess.run(
-            ["git", "diff", base_ref, "--", "verification_design.md"],
+            ["git", "diff", base_ref, "--", "research/synthesis.md"],
             cwd=ROOT,
             check=False,
             text=True,
@@ -389,25 +389,31 @@ def check_append_only(base_ref: str) -> Check:
         return Check("append-not-overwrite", False, "could not run git diff", [str(exc)])
     if diff.returncode != 0:
         return Check("append-not-overwrite", False, f"could not diff against {base_ref}", [diff.stderr.strip()])
+    hunk_lines = []
+    in_hunk = False
+    for line in diff.stdout.splitlines():
+        if line.startswith("@@"):
+            in_hunk = True
+        elif in_hunk:
+            hunk_lines.append(line)
     added_lines = {
         line[1:].strip()
-        for line in diff.stdout.splitlines()
-        if line.startswith("+") and not line.startswith("+++")
+        for line in hunk_lines
+        if line.startswith("+")
     }
-    deleted_callouts = []
-    for line in diff.stdout.splitlines():
-        if not line.startswith("-") or line.startswith("---"):
+    deleted_lines = []
+    for line in hunk_lines:
+        if not line.startswith("-"):
             continue
         normalized = line[1:].strip()
-        if normalized in added_lines:
+        if not normalized or normalized in added_lines or normalized.startswith("Status:"):
             continue
-        if "**Research**" in line or "update" in line.lower() or DATE_RE.search(line):
-            deleted_callouts.append(line)
+        deleted_lines.append(line)
     return Check(
         "append-not-overwrite",
-        not deleted_callouts,
-        f"{len(deleted_callouts)} deleted research/update callout lines in git diff against {base_ref}",
-        deleted_callouts,
+        not deleted_lines,
+        f"research/synthesis.md: {len(deleted_lines)} deleted non-blank lines without an allowed replacement in git diff against {base_ref}",
+        deleted_lines,
     )
 
 
@@ -604,6 +610,7 @@ def main() -> int:
         check_citation_review_provenance(DOCS[0]),
         check_numbering_and_anchors(DOCS[0]),
         check_update_provenance(DOCS[0]),
+        check_update_provenance(ROOT / "research/synthesis.md"),
         check_review_notes(),
         check_triage_notes(),
         check_append_only(args.base_ref),
@@ -611,7 +618,7 @@ def main() -> int:
         check_scout_config(),
     ]
     if not args.skip_links:
-        link_paths = paths + sorted(REVIEW_DIR.glob("*.md")) + sorted(TRIAGE_DIR.rglob("*.md"))
+        link_paths = paths + [ROOT / "research/synthesis.md"] + sorted(REVIEW_DIR.glob("*.md")) + sorted(TRIAGE_DIR.rglob("*.md"))
         if args.include_scout_links:
             link_paths += sorted(SCOUT_DIR.glob("*.md"))
         checks.insert(0, check_links(link_paths))

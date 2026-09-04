@@ -10,6 +10,7 @@ The runbook for this repository: document index, research workflow, site workflo
 
 ## Local Structure
 
+- `research/synthesis.md`: append-only evidence holding area organized by claim, pending maintainer fold.
 - `research/reviewed/`: reviewed source notes used before updating the canonical doc.
 - `ai-design-patterns/cards/`: AI design pattern cards.
 - `ai-design-patterns/scripts/lint_patterns.py`: pattern-card linter driven by `ai-design-patterns/constitution.json`.
@@ -29,7 +30,7 @@ The runbook for this repository: document index, research workflow, site workflo
 1. Scout mechanically in `research/scouts/` when looking broadly.
 2. Triage promising candidates in `research/triage/` using paraphrase and first-pass judgment.
 3. Review a new source in `research/reviewed/` before updating the canonical doc.
-4. Append dated updates to `verification_design.md`; do not overwrite prior research state.
+4. File new evidence under a claim in `research/synthesis.md`; fold into `verification_design.md` only under the fold-in bar.
 5. Keep inline citations and the References table balanced.
 6. Run `python3 scripts/verify.py`. A source update is not done after a `--skip-links` run; full verification includes link liveness.
 7. Treat substantive characterization as a human review item, not a mechanically verified fact.

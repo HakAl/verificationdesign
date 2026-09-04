@@ -6,10 +6,53 @@ Section headings are filing locations for new evidence, not commentary on the pr
 
 Seeded: 2026-08-19
 Header clarified: 2026-08-23
+Migrated legacy Update notes: 2026-09-04
+Source: dated Update notes from `verification_design.md`, preserved verbatim below.
 
 ## 1. External Signals Over Self-Review
 
+At seeding (2026-08-19):
+
 No claims recorded yet.
+
+### Self-correction outcomes depend on the intervention, model, and task rather than defining one uniform capability.
+
+Status: single-source
+
+Evidence:
+- arXiv:2510.16062, grade ungraded (legacy migration, no reviewed note), CorrectBench reports model- and task-dependent correction gains, with efficiency tradeoffs and competitive direct chain-of-thought baselines.
+
+Tension: The note qualifies the canonical warning about self-review by distinguishing intrinsic, external, and fine-tuned correction.
+What would move this: Independent comparisons across intervention types, model families, and tasks with matched compute budgets would change the Status.
+
+Migrated callouts:
+> **2026-05-30 Update**: Treat "self-correction" as a family of interventions, not a single capability. CorrectBench separates intrinsic, external, and fine-tuned correction, and reports that self-correction can help on some complex reasoning tasks while remaining strongly model- and task-dependent, efficiency-sensitive, and often competitive with a direct chain-of-thought baseline. The strongest warning in this doc applies to naive intrinsic self-review: the same model re-reading its own answer without new external information. Source: [arXiv:2510.16062](https://arxiv.org/abs/2510.16062)
+
+### Framing an identical error as external can improve correction relative to framing it as the model's own output.
+
+Status: single-source
+
+Evidence:
+- arXiv:2507.02778, grade ungraded (legacy migration, no reviewed note), Self-Correction Bench reports a self-correction blind spot in controlled error injection across 14 open-source non-reasoning models.
+
+Tension: The reported setting does not establish whether the same framing effect holds for naturally occurring errors or reasoning models.
+What would move this: Independent replication on naturally occurring errors and reasoning models would change the Status.
+
+Migrated callouts:
+> **2026-05-30 Update**: Self-Correction Bench offers a mechanism for weak intrinsic review: models can correct identical errors more reliably when the error is framed as external than when it is their own output. In the paper's controlled error-injection setup over 14 open-source non-reasoning models, this "self-correction blind spot" supports the practical rule to prefer independent reviewers or external verifiers; when self-review is unavoidable, force explicit reconsideration rather than a single-pass critique. Source: [arXiv:2507.02778](https://arxiv.org/abs/2507.02778)
+
+### Reasoning text can raise false-positive trajectory judgments while actions and observations remain fixed.
+
+Status: single-source
+
+Evidence:
+- arXiv:2601.14691, grade ungraded (legacy migration, no reviewed note), Gaming the Judge reports increased false-positive judgments after reasoning-only changes, especially fabricated progress.
+
+Tension: The reported intervention isolates reasoning text, but the note does not establish reliability for judgments grounded in external execution evidence.
+What would move this: Independent trajectory evaluations comparing reasoning-based judgments with action- and environment-grounded checks would change the Status.
+
+Migrated callouts:
+> **2026-05-30 Update**: An agent's chain-of-thought is not an external signal. Gaming the Judge shows that changing only the reasoning text while holding actions and observations fixed can substantially increase false-positive trajectory judgments, especially when the CoT fabricates progress. Treat CoT as an unverified claim stream: useful for hypotheses, but not evidence until checked against observed actions, tool outputs, and environment state. Source: [arXiv:2601.14691](https://arxiv.org/abs/2601.14691)
 
 ## 2. Independence Between Generation and Verification
 
@@ -36,6 +79,19 @@ Evidence:
 
 Tension: The experiments use model-simulated reviewers, and stage or artifact-length cost proxies do not measure human attention, fatigue, interruption cost, or review time.
 What would move this: A different group testing checkpoint schedules with measured human review time or cognitive cost, plus sensitivity analysis for stage-dependent error growth, would change the Status.
+
+### Tool-use verification can evaluate local action errors separately from failures in multi-step rollouts.
+
+Status: single-source
+
+Evidence:
+- arXiv:2601.12294, grade ungraded (legacy migration, no reviewed note), ToolPRMBench uses interaction history, tool metadata, and correct versus plausible incorrect actions for offline and online PRM evaluation.
+
+Tension: A benchmark structure does not by itself establish that deploying checkpoints improves end-to-end task success.
+What would move this: Independent deployment comparisons measuring local error detection and final task outcomes would change the Status.
+
+Migrated callouts:
+> **2026-05-29 Update**: Tool-agent verification is becoming a step-level problem in its own right, not just an application of reasoning-chain PRMs. ToolPRMBench frames tool-use PRM evaluation around interaction history, a correct action, a plausible incorrect alternative, and tool metadata, with offline sampling for local single-step errors and online sampling for multi-step rollout failures. For systems, this supports checking tool choice, argument validity, and observed tool-state transitions at each action boundary rather than waiting for final task success. Source: [arXiv:2601.12294](https://arxiv.org/abs/2601.12294)
 
 ## 4. Adversarial Framing
 
@@ -97,6 +153,32 @@ Evidence:
 Tension: This pre-LLM-judge source cluster supports a general validity distinction, but it does not directly test current agent-verification gates.
 What would move this: Independent modern evaluation that injects known failures into an agent or LLM-judge workflow and measures which passing gates detect them would change the Status.
 
+### Executable benchmark checks can pass against erroneous labels or construction rules that miss intended correctness.
+
+Status: single-source
+
+Evidence:
+- arXiv:2605.30504, grade ungraded (legacy migration, no reviewed note), An IRT audit of seven benchmarks reports likely label errors and 95% precision among its top 200 flagged items against consensus-plus-hand-inspection labels.
+
+Tension: The reported precision concerns selected flagged items and its reference-label procedure, not all benchmark labels.
+What would move this: Independent label audits with separately established reference judgments and measured downstream effects would change the Status.
+
+Migrated callouts:
+> **2026-06-09 Update**: Executable checks inherit the validity of their oracle. An IRT-based audit of seven preference and multiple-choice benchmarks (20986 items, responses from 114 models) surfaced likely label errors, with its authors reporting 95% precision in the top 200 flagged items against consensus-plus-hand-inspection reference labels. The error sources are instructive for verification design: mechanical construction rules that mark answers correct for satisfying the letter of a format rather than the intent, upstream annotation errors inherited unchanged across downstream variants, and items with no defensible single answer. A test that does not care what the agent thinks is still confidently wrong when its expected value is wrong. Design implication: expected values, labels, and fixtures need their own audit path; "the check passed" is conditional on oracle validity. Source: [arXiv:2605.30504](https://arxiv.org/abs/2605.30504)
+
+### Deterministic extractive-QA comparators can disagree with human correctness judgments when gold answers or matching criteria are inadequate.
+
+Status: single-source
+
+Evidence:
+- arXiv:2504.11972, grade ungraded (legacy migration, no reviewed note), Ho et al. report weak Exact Match and F1 correlations, discarded incorrect gold answers, and task-specific blind spots in an LLM judge.
+
+Tension: Higher reported judge correlation does not remove the need to audit ambiguous answers or the comparison target.
+What would move this: Independent extractive-QA evaluations with audited gold answers and disaggregated comparator and judge errors would change the Status.
+
+Migrated callouts:
+> **2026-06-13 Update**: A deterministic comparator can be reliable yet invalid when its oracle under-specifies correctness. In an extractive-QA setting, Ho et al. report that Exact Match and F1 had average correlations with human judgment of 0.220 and 0.404, while an LLM judge reached up to 0.85; they also discarded 39 of 200 sampled instances because the gold answer itself was wrong. The judge is not a free substitute for oracle audit: its own job-title answer correlation was 0.352, a blind spot tied to ambiguous multi-job answers. This strengthens the 2026-06-09 oracle-validity note: executable comparators and learned judges both need evidence that the target they compare against actually represents correctness. [arXiv:2504.11972](https://arxiv.org/abs/2504.11972)
+
 ## 7. Cross-Family Beats Self-Verification
 
 ### Candidate-aware cross-family judges can share exploitable false-positive basins when their judgments track plausibility rather than correctness.
@@ -118,6 +200,58 @@ Evidence:
 
 Tension: The authors present the result as measurement groundwork rather than evidence of broad downstream effects.
 What would move this: Ecological replication on deployed evaluation tasks that separately reports discrimination, abstention, and coverage would change the Status.
+
+### LLM-judge reliability can vary across benchmarks and perturbations even when the judge comes from a different model family.
+
+Status: single-source
+
+Evidence:
+- arXiv:2603.05399, grade ungraded (legacy migration, no reviewed note), Judge Reliability Harness reports that no evaluated judge was uniformly reliable across its benchmarks and perturbation types.
+
+Tension: The note challenges treating model-family separation as sufficient validation, without establishing a universally reliable replacement.
+What would move this: Independent harness results across additional judge families and deployed task formats would change the Status.
+
+Migrated callouts:
+> **2026-05-29 Update**: Cross-family LLM judges are not automatically reliable verification signals; they need their own validation harness. Judge Reliability Harness evaluates judge consistency and discrimination across free-response and agentic task formats, and its authors report that no evaluated judge was uniformly reliable across their benchmarks and perturbation types. For systems, this suggests treating LLM judges as calibrated instruments: use perturbation tests, report observed judge behavior, and prefer executable checks for claims that can be made verifiable. Source: [arXiv:2603.05399](https://arxiv.org/abs/2603.05399)
+
+### Mitigations for chain-of-thought manipulation can leave residual judge errors while removing reasoning text can reduce recall.
+
+Status: single-source
+
+Evidence:
+- arXiv:2601.14691, grade ungraded (legacy migration, no reviewed note), Gaming the Judge reports incomplete mitigation from prompts, rubrics, and extra compute, alongside recall costs from removing chain-of-thought.
+
+Tension: Reducing reasoning exposure and retaining useful detection signals can pull precision and recall in different directions.
+What would move this: Independent comparisons reporting precision and recall for mitigations with external action and environment evidence would change the Status.
+
+Migrated callouts:
+> **2026-05-30 Update**: Cross-family judging does not make chain-of-thought safe as a verification surface. Gaming the Judge reports that manipulation-aware prompts, rubric changes, and extra judge compute reduce but do not eliminate CoT manipulation, while removing CoT can reduce recall. The design implication is not "never show CoT"; it is to ground any CoT-derived judgment in action logs, tool results, and environment evidence, and to report the resulting precision/recall tradeoff. Source: [arXiv:2601.14691](https://arxiv.org/abs/2601.14691)
+
+### Judge debiasing validated on a static audit distribution can leave or redirect bias under subsequent optimization.
+
+Status: single-source
+
+Evidence:
+- arXiv:2605.27996, grade ungraded (legacy migration, no reviewed note), Reward Bias Substitution reports indistinguishable audit observables for different mitigation outcomes and empirical proxy shifts under optimization.
+
+Tension: The reported identifiability result and tested optimization settings do not validate a general replacement debiasing method.
+What would move this: Independent evaluations tracking multiple bias features under the distributions induced by optimization would change the Status.
+
+Migrated callouts:
+> **2026-06-09 Update**: "Debias the judge" is not a dependable fix. Reward Bias Substitution proves that under any audit-distribution scoring, even with oracle access to the true reward, successful mitigation, bias substitution, and overcorrection produce identical observables; single-axis fixes for length, sycophancy, or style can rotate optimization pressure onto correlated proxies instead of removing it. Empirically, a length penalty under GRPO compressed responses while driving the policy into overconfidence and lower free-form accuracy, and a published length-debiasing operator that zeroed reward-length correlation on the audit set reintroduced the bias under best-of-N selection on three of four reward models tested. The transfer to verification design: a debiased judge is only certified under the distribution the optimized system actually induces, with multiple bias features tracked at once, and a single-axis debiasing claim validated on a static audit set is an unverified claim. This strengthens the existing stance: prefer executable checks over patched judges. Source: [arXiv:2605.27996](https://arxiv.org/abs/2605.27996)
+
+### Judge reliability measurements can depend on task-specific consistency under perturbation before human alignment is assessed.
+
+Status: single-source
+
+Evidence:
+- arXiv:2602.00521, grade ungraded (legacy migration, no reviewed note), An IRT framework measures intrinsic consistency before human alignment and reports different reliability outcomes for summarization and dialogue scoring across seven judges.
+
+Tension: The framework supplies a measurement order, but the note does not establish universal acceptance thresholds across tasks.
+What would move this: Independent task-level replication with prespecified consistency thresholds and separate human-alignment measurements would change the Status.
+
+Migrated callouts:
+> **2026-06-09 Update**: Judge validation is becoming a measurement discipline. An Item Response Theory framework formalizes judge reliability in two ordered phases: intrinsic consistency first (stability of the judge's latent quality estimates under typo, line-break, and paraphrase perturbations, with explicit acceptance thresholds), then human alignment, which is only meaningful for judges that pass the consistency phase. Across seven judges, reliability varied sharply by task: summarization judging held up while dialogue understandability scoring fell well below the framework's reliability threshold. For harness design this sharpens the 2026-05-29 note: perturbation tests with stated thresholds come before any alignment claim, and validation is per task, not per judge. Source: [arXiv:2602.00521](https://arxiv.org/abs/2602.00521)
 
 ## 8. Simulate Debate
 

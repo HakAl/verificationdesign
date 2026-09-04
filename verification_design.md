@@ -8,10 +8,6 @@ Reference document for building systems that guide agents through end-to-end ver
 
 This is the single most replicated finding across the literature (Huang et al., ICLR 2024 [arXiv:2310.01798](https://arxiv.org/abs/2310.01798); Kamoi et al., TACL 2024 [doi:10.1162/tacl_a_00713](https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/); ICLR 2025 self-verification study [openreview:4O0v4s3IzY](https://openreview.net/forum?id=4O0v4s3IzY)). Asking an agent to "review your work" is the most common and least effective verification pattern. Performance *degrades* with naive self-correction. The model changes correct answers to incorrect ones.
 
-> **2026-05-30 Update**: Treat "self-correction" as a family of interventions, not a single capability. CorrectBench separates intrinsic, external, and fine-tuned correction, and reports that self-correction can help on some complex reasoning tasks while remaining strongly model- and task-dependent, efficiency-sensitive, and often competitive with a direct chain-of-thought baseline. The strongest warning in this doc applies to naive intrinsic self-review: the same model re-reading its own answer without new external information. Source: [arXiv:2510.16062](https://arxiv.org/abs/2510.16062)
-
-> **2026-05-30 Update**: Self-Correction Bench offers a mechanism for weak intrinsic review: models can correct identical errors more reliably when the error is framed as external than when it is their own output. In the paper's controlled error-injection setup over 14 open-source non-reasoning models, this "self-correction blind spot" supports the practical rule to prefer independent reviewers or external verifiers; when self-review is unavoidable, force explicit reconsideration rather than a single-pass critique. Source: [arXiv:2507.02778](https://arxiv.org/abs/2507.02778)
-
 The implication is absolute: every verification step in a system must be grounded in something the agent can **execute and observe**, not something it **reads and opines on**.
 
 ---
@@ -32,8 +28,6 @@ The difference is mechanical extraction vs. subjective interpretation. Mechanica
 
 > **Research**: Agent-as-a-Judge (ICML 2025) showed that giving evaluators agency (the ability to run code and check files) achieved ~90% agreement with human experts, vs. ~70% for LLM-as-Judge (reading and opining). [arXiv:2410.10934](https://arxiv.org/abs/2410.10934)
 
-> **2026-05-30 Update**: An agent's chain-of-thought is not an external signal. Gaming the Judge shows that changing only the reasoning text while holding actions and observations fixed can substantially increase false-positive trajectory judgments, especially when the CoT fabricates progress. Treat CoT as an unverified claim stream: useful for hypotheses, but not evidence until checked against observed actions, tool outputs, and environment state. Source: [arXiv:2601.14691](https://arxiv.org/abs/2601.14691)
-
 ### 2. Independence Between Generation and Verification
 
 If the verifier can see the original output, it copies the same errors. The verification step must NOT be conditioned on the draft. Force the agent to re-derive or independently check claims.
@@ -53,8 +47,6 @@ Verify intermediate steps throughout the workflow, not just the final output. St
 For a multi-scenario system: verify after each scenario, not just at the end. For a code generation pipeline: check the design before implementation, check the implementation before testing, check the tests before the report.
 
 > **Research**: Process Reward Models (PRMs) provide feedback at each step of a reasoning chain rather than only evaluating the final output. ThinkPRM outperformed LLM-as-Judge by 7.2% on ProcessBench. Step-level verification also enables better error localization: you know *which* step failed, not just that something failed. [arXiv:2504.16828](https://arxiv.org/abs/2504.16828)
-
-> **2026-05-29 Update**: Tool-agent verification is becoming a step-level problem in its own right, not just an application of reasoning-chain PRMs. ToolPRMBench frames tool-use PRM evaluation around interaction history, a correct action, a plausible incorrect alternative, and tool metadata, with offline sampling for local single-step errors and online sampling for multi-step rollout failures. For systems, this supports checking tool choice, argument validity, and observed tool-state transitions at each action boundary rather than waiting for final task success. Source: [arXiv:2601.12294](https://arxiv.org/abs/2601.12294)
 
 ### 4. Adversarial Framing
 
@@ -99,10 +91,6 @@ For non-code systems: find the executable analog. Can you curl an endpoint? Run 
 
 > **Research**: TDD teams released 32% more frequently; TDD produces 40-80% fewer bugs (Thoughtworks 2024). Reflexion (NeurIPS 2023) works because it uses *external* feedback (test output, environment signals). The reflection itself is not the magic; the external signal is. [arXiv:2303.11366](https://arxiv.org/abs/2303.11366)
 
-> **2026-06-09 Update**: Executable checks inherit the validity of their oracle. An IRT-based audit of seven preference and multiple-choice benchmarks (20986 items, responses from 114 models) surfaced likely label errors, with its authors reporting 95% precision in the top 200 flagged items against consensus-plus-hand-inspection reference labels. The error sources are instructive for verification design: mechanical construction rules that mark answers correct for satisfying the letter of a format rather than the intent, upstream annotation errors inherited unchanged across downstream variants, and items with no defensible single answer. A test that does not care what the agent thinks is still confidently wrong when its expected value is wrong. Design implication: expected values, labels, and fixtures need their own audit path; "the check passed" is conditional on oracle validity. Source: [arXiv:2605.30504](https://arxiv.org/abs/2605.30504)
-
-> **2026-06-13 Update**: A deterministic comparator can be reliable yet invalid when its oracle under-specifies correctness. In an extractive-QA setting, Ho et al. report that Exact Match and F1 had average correlations with human judgment of 0.220 and 0.404, while an LLM judge reached up to 0.85; they also discarded 39 of 200 sampled instances because the gold answer itself was wrong. The judge is not a free substitute for oracle audit: its own job-title answer correlation was 0.352, a blind spot tied to ambiguous multi-job answers. This strengthens the 2026-06-09 oracle-validity note: executable comparators and learned judges both need evidence that the target they compare against actually represents correctness. [arXiv:2504.11972](https://arxiv.org/abs/2504.11972)
-
 ### 7. Cross-Family Beats Self-Verification
 
 If using LLM-based verification, a different model family is needed. Self-verification and intra-family verification are systematically biased toward accepting incorrect outputs. The same blind spots that caused the error also prevent detecting it.
@@ -118,14 +106,6 @@ For single-agent workflows, this means: lean on tooling rather than self-review.
 | Knowledge-heavy tasks | Lower verifiability |
 
 > **Research**: A study of 37 models across 9 benchmarks found that self-verification increases compute cost while imperfect verifiers produce false positives, eliminate valid reasoning paths, and fail to select the right solution. "Significant performance collapse with self-critique" but "significant performance gains with sound external verification." [arXiv:2512.02304](https://arxiv.org/html/2512.02304), [openreview:4O0v4s3IzY](https://openreview.net/forum?id=4O0v4s3IzY)
-
-> **2026-05-29 Update**: Cross-family LLM judges are not automatically reliable verification signals; they need their own validation harness. Judge Reliability Harness evaluates judge consistency and discrimination across free-response and agentic task formats, and its authors report that no evaluated judge was uniformly reliable across their benchmarks and perturbation types. For systems, this suggests treating LLM judges as calibrated instruments: use perturbation tests, report observed judge behavior, and prefer executable checks for claims that can be made verifiable. Source: [arXiv:2603.05399](https://arxiv.org/abs/2603.05399)
-
-> **2026-05-30 Update**: Cross-family judging does not make chain-of-thought safe as a verification surface. Gaming the Judge reports that manipulation-aware prompts, rubric changes, and extra judge compute reduce but do not eliminate CoT manipulation, while removing CoT can reduce recall. The design implication is not "never show CoT"; it is to ground any CoT-derived judgment in action logs, tool results, and environment evidence, and to report the resulting precision/recall tradeoff. Source: [arXiv:2601.14691](https://arxiv.org/abs/2601.14691)
-
-> **2026-06-09 Update**: "Debias the judge" is not a dependable fix. Reward Bias Substitution proves that under any audit-distribution scoring, even with oracle access to the true reward, successful mitigation, bias substitution, and overcorrection produce identical observables; single-axis fixes for length, sycophancy, or style can rotate optimization pressure onto correlated proxies instead of removing it. Empirically, a length penalty under GRPO compressed responses while driving the policy into overconfidence and lower free-form accuracy, and a published length-debiasing operator that zeroed reward-length correlation on the audit set reintroduced the bias under best-of-N selection on three of four reward models tested. The transfer to verification design: a debiased judge is only certified under the distribution the optimized system actually induces, with multiple bias features tracked at once, and a single-axis debiasing claim validated on a static audit set is an unverified claim. This strengthens the existing stance: prefer executable checks over patched judges. Source: [arXiv:2605.27996](https://arxiv.org/abs/2605.27996)
-
-> **2026-06-09 Update**: Judge validation is becoming a measurement discipline. An Item Response Theory framework formalizes judge reliability in two ordered phases: intrinsic consistency first (stability of the judge's latent quality estimates under typo, line-break, and paraphrase perturbations, with explicit acceptance thresholds), then human alignment, which is only meaningful for judges that pass the consistency phase. Across seven judges, reliability varied sharply by task: summarization judging held up while dialogue understandability scoring fell well below the framework's reliability threshold. For harness design this sharpens the 2026-05-29 note: perturbation tests with stated thresholds come before any alignment claim, and validation is per task, not per judge. Source: [arXiv:2602.00521](https://arxiv.org/abs/2602.00521)
 
 ### 8. Simulate Debate
 
@@ -231,20 +211,11 @@ When writing a verification system:
 | Reflexion | Shinn et al., NeurIPS 2023 | [arXiv:2303.11366](https://arxiv.org/abs/2303.11366) |
 | LLMs Cannot Self-Correct | Huang et al., ICLR 2024 | [arXiv:2310.01798](https://arxiv.org/abs/2310.01798) |
 | When Can LLMs Correct Mistakes? | Kamoi et al., TACL 2024 | [doi:10.1162/tacl_a_00713](https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/) |
-| CorrectBench | Tie et al., NeurIPS 2025 Datasets & Benchmarks | [arXiv:2510.16062](https://arxiv.org/abs/2510.16062) |
-| Self-Correction Bench | Jul 2025 | [arXiv:2507.02778](https://arxiv.org/abs/2507.02778) |
 | When Does Verification Pay Off? | Dec 2025 | [arXiv:2512.02304](https://arxiv.org/html/2512.02304) |
 | Tensor-Parallel Inference Determinism | Nov 2025 | [arXiv:2511.17826](https://arxiv.org/abs/2511.17826) |
 | Self-Verification Limitations | ICLR 2025 | [openreview:4O0v4s3IzY](https://openreview.net/forum?id=4O0v4s3IzY) |
-| Judge Reliability Harness | Dev et al., ICLR 2026 workshop | [arXiv:2603.05399](https://arxiv.org/abs/2603.05399) |
-| Gaming the Judge | Khalifa et al., Jan 2026 | [arXiv:2601.14691](https://arxiv.org/abs/2601.14691) |
-| Reward Bias Substitution | Lamparth et al., May 2026 | [arXiv:2605.27996](https://arxiv.org/abs/2605.27996) |
-| Benchmark Label Auditing (IRT) | Land and Bikel, May 2026 | [arXiv:2605.30504](https://arxiv.org/abs/2605.30504) |
-| LLM-as-a-Judge for Extractive QA | Ho et al., Apr 2025 | [arXiv:2504.11972](https://arxiv.org/abs/2504.11972) |
-| Judge Reliability via IRT | Choi et al., Jan 2026 | [arXiv:2602.00521](https://arxiv.org/abs/2602.00521) |
 | Agent-as-a-Judge | ICML 2025 | [arXiv:2410.10934](https://arxiv.org/abs/2410.10934) |
 | ThinkPRM | Apr 2025 | [arXiv:2504.16828](https://arxiv.org/abs/2504.16828) |
-| ToolPRMBench | Li et al., Jan 2026 | [arXiv:2601.12294](https://arxiv.org/abs/2601.12294) |
 | Constitutional AI | Bai et al., Anthropic | [arXiv:2212.08073](https://arxiv.org/abs/2212.08073) |
 | Multi-Agent Reflexion | Dec 2025 | [arXiv:2512.20845](https://arxiv.org/html/2512.20845) |
 | SycEval | AAAI 2025 | [aaai:36598](https://ojs.aaai.org/index.php/AIES/article/download/36598/38736/40673) |

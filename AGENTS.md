@@ -38,6 +38,7 @@ Claude Code is the architect: plan, design, review, sign off, and direct the Cod
 - `verificationdesign/`: Astro static site for publishing the principles and pattern cards at `verificationdesign.com`.
 - `verificationdesign/src/content/loaders/cardsLoader.mjs`: custom loader that reads cards from `ai-design-patterns/cards/`; the website should not fork source card prose.
 - `verificationdesign/scripts/verify-site.sh`: local wrapper for website verification.
+- `research/synthesis.md`: append-only evidence holding area organized by claim, pending maintainer fold.
 - `research/reviewed/`: short source review notes created before canonical doc updates.
 - `research/scouts/`: scout configuration; raw scout outputs stay local and untracked (sources that matter are promoted through triage and review).
 - `research/triage/`: first-pass judgment notes for scout candidates before full source review.
@@ -50,7 +51,7 @@ Claude Code is the architect: plan, design, review, sign off, and direct the Cod
 ## Document conventions
 
 - Every empirical/research claim carries an inline source citation (e.g. `[arXiv:2309.11495]`) **and** a matching row in that doc's References table.
-- **Append, don't overwrite.** When a finding updates a principle, add a *dated* update note keyed to that principle/section number. Do not delete prior state; the evolution is the value. Research callouts only grow.
+- **Holding area, then fold.** New evidence accumulates in `research/synthesis.md` under claims and is append-only there. It reaches `verification_design.md` only when the maintainer folds it under the fold-in bar, by changing principle prose or the folded `Research` callouts. Do not add dated update notes to `verification_design.md`.
 - **Stable numbering.** Principle/section numbers never shift. Append; do not renumber.
 - Date every update note (ISO 8601, e.g. `2026-05-29`).
 - Do not use em dashes in repo prose. Use a colon, semicolon, comma, parentheses, or a new sentence. Preserve original punctuation in verbatim quotes and source excerpts.
@@ -101,7 +102,7 @@ Derived from `verification_design.md`; this repo follows its own principles.
 - Before any update is considered done, run `scripts/verify.py` and pass **all** of:
   1. **Link liveness**: every canonical/reviewed URL or arXiv ID resolves (HTTP 200), or has a dated manual confirmation for publisher blocking.
   2. **Citation ⇄ reference balance**: every inline citation has a References row and vice versa; zero orphans in either direction.
-  3. **Append-not-overwrite**: `git diff HEAD -- verification_design.md` shows research callouts only added, not deleted. Use `--base-ref` or `VERIFY_BASE_REF` for multi-commit branch review. Fail if a prior callout was removed without an explicit, human-approved rationale.
+  3. **Append-not-overwrite** on `research/synthesis.md`: `git diff` shows claim records only added, never deleted; a `Status:` line may change. `verification_design.md` prose is curated and mutable; substantive changes are protected by review, not by this gate. Use `--base-ref` or `VERIFY_BASE_REF` for multi-commit review.
   4. **Format / anchor lint**: markdown lints clean; internal `#anchors` resolve; numbering contiguous.
   5. **Provenance**: each update note names its source.
 - CI gates deploy on the hermetic subset: `scripts/verify.py --skip-links`, the pattern and card-code linters, and the site build/check/lint/a11y steps. Full `scripts/verify.py`, including link liveness, must pass locally before any push because CI runner IPs are blocked by publishers/arXiv and cannot run link liveness reliably.
