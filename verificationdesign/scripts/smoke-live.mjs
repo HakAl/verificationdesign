@@ -1,11 +1,15 @@
+import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 const SITE = 'https://verificationdesign.com';
-const base = (process.argv[2] ?? SITE).replace(/\/$/, '');
+const allowStale = process.argv.includes('--allow-stale');
+const base = (process.argv.slice(2).find((arg) => !arg.startsWith('--')) ?? SITE).replace(/\/$/, '');
 const repo = resolve(process.cwd(), '..');
 const cardsDir = join(repo, 'ai-design-patterns/cards');
 let failures = 0;
+const responses = new Map();
 
 function sourceBody(text) {
   return `${text.replace(/\r\n/g, '\n').replace(/\n*$/, '')}\n`;
@@ -32,9 +36,15 @@ function categoryOf(text) {
 async function request(path, expectedType, marker, canonical, optional = false) {
   try {
     const response = await fetch(`${base}${path}`);
-    const body = await response.text();
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const body = bytes.toString('utf8');
+    if (response.ok) responses.set(path, bytes);
     const type = response.headers.get('content-type') ?? '';
     const link = response.headers.get('link') ?? '';
+    if (path === '/' || path === '/patterns/') {
+      console.log(`${path}: alternate_header=${JSON.stringify(link)}`);
+      if (path === '/patterns/' && !link.includes(`<${SITE}/patterns.md>; rel="alternate"; type="text/markdown"`)) failures += 1;
+    }
     const markerFound = typeof marker === 'function' ? marker(body) : body.includes(marker);
     console.log(`${path}: status=${response.status} content_type=${JSON.stringify(type)} link=${JSON.stringify(link)} marker=${markerFound}`);
     if (optional) return;
@@ -84,5 +94,24 @@ for (const path of ['/', '/patterns/']) {
   });
 }
 await request('/principles.md/', '', () => true, undefined, true);
+const dist = resolve(process.cwd(), 'dist');
+if (existsSync(dist)) {
+  for (const name of ['llms-full.txt', 'principles.md', 'catalog.json']) {
+    try {
+      const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
+      const localHash = hash(await readFile(join(dist, name)));
+      const liveBytes = responses.get(`/${name}`);
+      const liveHash = liveBytes ? hash(liveBytes) : 'unavailable';
+      const equal = localHash === liveHash;
+      console.log(`${name}: local_sha256=${localHash} live_sha256=${liveHash} equal=${equal}`);
+      if (!equal && !allowStale) failures += 1;
+    } catch (error) {
+      console.log(`${name}: comparison_error=${JSON.stringify(error.message)}`);
+      failures += 1;
+    }
+  }
+} else {
+  console.log('Local/live SHA-256 comparison skipped: dist/ does not exist');
+}
 console.log(`Live smoke summary: checked=${twins.length + 6} failures=${failures}`);
 if (failures) process.exit(1);

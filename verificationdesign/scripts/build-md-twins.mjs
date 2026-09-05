@@ -1,6 +1,9 @@
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import {
+  cardUpdated,
   extractCategory,
   extractIntent,
   extractRelated,
@@ -13,10 +16,12 @@ import { REPO_URL } from '../src/lib/repo.ts';
 
 const SITE = 'https://verificationdesign.com';
 const REPO = resolve(process.cwd(), '..');
+const REVISION = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { cwd: REPO, encoding: 'utf8' }).trim();
+const sha256 = (body) => createHash('sha256').update(body).digest('hex');
 const CARDS_DIR = join(REPO, 'ai-design-patterns/cards');
 const DIST = resolve(process.cwd(), 'dist');
 const LICENSE = 'CC BY 4.0';
-const RAW_PRINCIPLES_URL = `${REPO_URL.replace('https://github.com/', 'https://raw.githubusercontent.com/')}/main/verification_design.md`;
+const RAW_PRINCIPLES_URL = `${REPO_URL.replace('https://github.com/', 'https://raw.githubusercontent.com/')}/${REVISION}/verification_design.md`;
 const CATEGORY_LABELS = {
   'context-and-state': 'Context and State Patterns',
   verification: 'Verification Patterns',
@@ -30,7 +35,16 @@ function normalizeBody(value) {
 function extractSection(body, heading) {
   const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const match = body.match(new RegExp(`^## ${escaped}\\s*\\n([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, 'm'));
-  return match?.[1]?.trim().replace(/\s+/g, ' ') ?? '';
+  return match?.[1]?.trim() ?? '';
+}
+
+function firstParagraph(body, heading) {
+  return extractSection(body, heading).split(/\n\s*\n/)[0];
+}
+
+function bullets(body, heading) {
+  return [...extractSection(body, heading).matchAll(/^[*-] (.+(?:\n[ \t]+.+)*)/gm)]
+    .map((match) => match[1].replace(/[*_]/g, '').replace(/\s+/g, ' ').trim());
 }
 
 function sortKeys(value) {
@@ -126,6 +140,8 @@ await emit('principles.md', `${frontmatter({
   title: 'Verification Design Principles',
   canonical: `${SITE}/principles/`,
   source: 'verification_design.md',
+  source_url: RAW_PRINCIPLES_URL,
+  scope: 'The complete reference document; the HTML Principles page is a shorter, illustrated overview.',
   license: LICENSE,
 })}${principlesBody}`);
 registerTwin('principles.md', `${SITE}/principles/`);
@@ -146,6 +162,8 @@ for (const card of orderedCards) {
     title: card.title,
     canonical,
     source: card.source,
+    source_url: `${REPO_URL.replace('https://github.com/', 'https://raw.githubusercontent.com/')}/${REVISION}/${card.source}`,
+    updated: cardUpdated(join(CARDS_DIR, card.file)),
     license: LICENSE,
   }, related)}${card.body}`);
   registerTwin(`patterns/${card.category}/${card.slug}.md`, canonical);
@@ -214,23 +232,23 @@ const llms = [
   '',
   '> Sourced principles and executable, stdlib-only Python pattern cards for verifying agent work: designing evals, checking tool-use output, and replacing self-review with external signals. Use when an agent must check its own or another agent\'s work.',
   '',
-  'Content is licensed under CC BY 4.0. Every `.md` link below is the source markdown for the matching HTML page.',
+  'Content is licensed under CC BY 4.0. Markdown links provide reference documents and generated indexes for the corresponding HTML pages.',
   '',
   '## Available representations',
   '',
   `- [llms.txt](${SITE}/llms.txt): This index. Fetch first.`,
   `- [llms-full.txt](${SITE}/llms-full.txt): The full corpus in one plain-text file: principles, all cards in reading order, references. Fetch when you need everything.`,
-  `- [catalog.json](${SITE}/catalog.json): Routing manifest: one record per card with title, intent, URLs, related cards, determinism move, observable signal, plus the failure map. Fetch to pick one card without loading the corpus.`,
+  `- [catalog.json](${SITE}/catalog.json): Versioned routing manifest with revision and content hashes; per-card title, intent, URLs, related cards, first-paragraph determinism move and observable signal, use_when and do_not_use_when lists, pattern_example and evidence_count coverage, plus the failure map. Coverage records are not research approval. Fetch to pick one card without loading the corpus.`,
   `- [patterns.md](${SITE}/patterns.md): Pattern index with the failure map. Fetch to choose a pattern from a symptom.`,
   `- [context-and-state.md](${SITE}/patterns/context-and-state.md): Index of the Context and State cards.`,
   `- [verification.md](${SITE}/patterns/verification.md): Index of the Verification cards.`,
   `- [orchestration.md](${SITE}/patterns/orchestration.md): Index of the Orchestration cards.`,
-  `- [principles.md](${SITE}/principles.md): The canonical principles document.`,
+  `- [principles.md](${SITE}/principles.md): The complete reference document; the HTML Principles page is a shorter, illustrated overview.`,
   `- [references.md](${SITE}/references.md): Deduplicated sources.`,
   '',
   '## Principles',
   '',
-  `- [Verification Design Principles](${SITE}/principles.md): The canonical principles document.`,
+  `- [Verification Design Principles](${SITE}/principles.md): The complete reference document; the HTML Principles page is a shorter, illustrated overview.`,
   `- [Raw principles source](${RAW_PRINCIPLES_URL}): The repository source file, raw markdown.`,
   '',
   ...Object.entries(CATEGORY_LABELS).flatMap(([category, title]) => [
@@ -273,6 +291,9 @@ const full = fullBlocks.map((block) => [
 await emit('llms-full.txt', full);
 
 const catalog = {
+  schema_version: 1,
+  revision: REVISION,
+  content_sha256: sha256(orderedCards.map((card) => card.body).join('')),
   generated: true,
   license: LICENSE,
   site: SITE,
@@ -288,15 +309,20 @@ const catalog = {
     intent: card.intent,
     html_url: card.canonical,
     markdown_url: card.markdownUrl,
-    source_url: `${REPO_URL.replace('https://github.com/', 'https://raw.githubusercontent.com/')}/main/${card.source}`,
+    source_url: `${REPO_URL.replace('https://github.com/', 'https://raw.githubusercontent.com/')}/${REVISION}/${card.source}`,
     related: card.relatedNames.map((rawTitle) => {
       const title = rawTitle.replace(/:$/, '');
       const target = byTitle.get(title);
       if (!target) throw new Error(`${card.file} names unknown related pattern: ${title}`);
       return target.id;
     }),
-    determinism_move: extractSection(card.body, 'Determinism Move'),
-    observable_signal: extractSection(card.body, 'Observable Signal'),
+    determinism_move: firstParagraph(card.body, 'Determinism Move'),
+    observable_signal: firstParagraph(card.body, 'Observable Signal'),
+    use_when: bullets(card.body, 'Use When'),
+    do_not_use_when: bullets(card.body, 'Do Not Use When'),
+    pattern_example: /### Pattern[^\n]*\n(?:(?!\n###? )[^])*?```python\n/.test(card.body) ? 'executable' : 'none',
+    evidence_count: bullets(card.body, 'Evidence').length,
+    source_sha256: sha256(card.body),
   })),
   failures: FAILURE_MAP.map((entry) => ({
     failure: entry.failure,
@@ -310,12 +336,20 @@ const headerRules = twins.map((twin) => [
   twin.path,
   `  Link: <${twin.canonical}>; rel="canonical"`,
 ].join('\n')).join('\n\n');
+const alternates = new Map();
+for (const twin of twins) {
+  const path = new URL(twin.canonical).pathname;
+  if (!alternates.has(path)) alternates.set(path, []);
+  alternates.get(path).push(`  Link: <${SITE}${twin.path}>; rel="alternate"; type="text/markdown"`);
+}
+const reverseRules = [...alternates].map(([path, links]) => [path, ...links].join('\n')).join('\n\n');
 const staticHeaders = (await readFile(resolve(process.cwd(), 'public/_headers'), 'utf8'))
   .replace(/\r\n/g, '\n')
   .replace(/\n*$/, '\n');
-await writeFile(join(DIST, '_headers'), `${staticHeaders}\n${headerRules}\n`, 'utf8');
+await writeFile(join(DIST, '_headers'), `${staticHeaders}\n${headerRules}\n\n${reverseRules}\n`, 'utf8');
 
 console.log(`Generated markdown twins: ${twins.length}`);
 console.log(`Generated llms.txt card entries: ${orderedCards.length}`);
 console.log(`Generated llms-full.txt content blocks: ${fullBlocks.length}`);
 console.log(`Appended canonical header rules: ${twins.length}`);
+console.log(`Appended alternate header links: ${twins.length} across ${alternates.size} HTML routes`);

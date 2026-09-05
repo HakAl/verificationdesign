@@ -1,5 +1,6 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join, dirname, resolve, relative } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,17 @@ const CATEGORY_LABEL = {
   'verification': 'Verification',
   'orchestration': 'Orchestration',
 };
+
+export function cardUpdated(filePath, warn = console.warn) {
+  try {
+    const date = execFileSync('git', ['log', '-1', '--format=%cI', '--', filePath], {
+      cwd: dirname(filePath), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+    if (date && !Number.isNaN(Date.parse(date))) return date.split('T')[0];
+  } catch { /* A source archive may have no git history. */ }
+  warn(`cardsLoader: no git date for ${filePath}; using build date`);
+  return new Date().toISOString().split('T')[0];
+}
 
 export function extractTitle(content) {
   const match = content.match(/^#\s+(.+)$/m);
@@ -106,7 +118,6 @@ export function cardsLoader({ sourcePath }) {
       for (const file of markdown) {
         const filePath = join(absoluteSource, file);
         const content = await readFile(filePath, 'utf8');
-        const stats = await stat(filePath);
 
         const title = extractTitle(content);
         const category = extractCategory(content);
@@ -121,14 +132,14 @@ export function cardsLoader({ sourcePath }) {
           continue;
         }
 
-        cardInputs.push({ file, filePath, content, stats, title, category, slug });
+        cardInputs.push({ file, filePath, content, title, category, slug });
         linksByTitle.set(title.toLowerCase(), `/patterns/${category}/${slug}/`);
       }
 
       for (const input of cardInputs) {
-        const { filePath, content, stats, title, category, slug } = input;
+        const { filePath, content, title, category, slug } = input;
         const id = `${category}/${slug}`;
-        const updated = stats.mtime.toISOString().split('T')[0];
+        const updated = cardUpdated(filePath, (message) => logger.warn(message));
         const related = extractRelated(content);
         const intent = extractIntent(content);
         const renderedContent = linkRelatedPatterns(content, linksByTitle);

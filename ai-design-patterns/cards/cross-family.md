@@ -10,7 +10,7 @@ Also known as: Cross-Provider Verification, Independent-Family Judge, Family-Div
 
 ## Intent
 
-Run high-leverage generation and high-leverage assessment on deliberately different model families, and record both identities, so shared training-data biases and shared latent priors cannot pass undetected through the verification boundary.
+Run high-leverage generation and high-leverage assessment on deliberately different model families, and record both identities, so exposure to shared training-data biases and shared latent priors is reduced rather than assumed away, and any residual correlated error is attributable to named models.
 
 Cross-Family has two complementary roles. At verification time, the judge comes from a different family than the generator. At optimization time, the teacher or proposer comes from a different family than the model being shaped. Both roles serve the same mechanic: break same-family blind spots where one model's confidence becomes another model's evidence.
 
@@ -161,6 +161,8 @@ harness: none
 
 ## Failure Modes
 
+Family inequality is a configuration fact; its effect on correlated error must be measured on the target workload, not assumed from the configuration.
+
 * **Same-Client Grading:** one client object is used for both generator and verifier. No assertion enforces family diversity. Construct distinct clients and assert at routing time.
 * **Leaky Default:** the framework exposes a configurable verifier slot, but the default resolves to the same family the application is built on. Refuse to construct the verifier when the family is unset.
 * **Role Diversity Mistaken for Verifier Diversity:** players, writers, managers, and researchers are diverse across families, but the judge defaults to one family. Identify the verification boundary separately from role assignment.
@@ -190,7 +192,7 @@ If only one family is reachable, label the result as informal and maximize execu
 ## Evidence
 
 * **Verification Design Principle 7:** the design doc names Cross-Family Beats Self-Verification and frames same-family review as weaker than independent verification.
-* **Judge Reliability Harness update:** the same principle records the caveat that judge reliability still needs perturbation, consistency, and calibration checks.
+* **Judge Reliability Harness update:** [the synthesis claim on LLM-judge reliability](https://github.com/verificationdesign/verificationdesign/blob/main/research/synthesis.md#llm-judge-reliability-can-vary-across-benchmarks-and-perturbations-even-when-the-judge-comes-from-a-different-model-family) records the caveat that judge reliability still needs perturbation, consistency, and calibration checks.
 * **[AutoGen](https://github.com/microsoft/autogen) task-centric memory grader:** the antipattern cleanup sweep records a same-client grader that extracts and judges answers with one `ChatCompletionClient`.
 * **zen same-family tiers:** the mining note records a provider-wide same-family pipeline where review, fix, and escalation stay inside the chosen family.
 * **[ChatArena](https://github.com/Farama-Foundation/chatarena) and [DeepEval](https://github.com/confident-ai/deepeval):** the cross-family sweep records role-diverse or configurable evaluation surfaces that do not, by themselves, enforce family diversity.

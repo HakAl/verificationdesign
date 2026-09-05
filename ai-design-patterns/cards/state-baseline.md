@@ -10,7 +10,7 @@ Also known as: Pre-Action Snapshot, Baseline Capture, Snapshot-Restore Harness.
 
 ## Intent
 
-Capture the relevant environment or process state before an action under verification, so the verifier can prove the action caused the observed change instead of accepting state that already existed.
+Capture the relevant environment or process state before an action under verification, so the verifier can establish that observed state did not already exist before the action; causal attribution requires isolation or a Causal Tag.
 
 ## Problem
 

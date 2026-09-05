@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 
@@ -6,6 +8,8 @@ const SITE = 'https://verificationdesign.com';
 const REPO_FIXTURE = 'https://github.com/verificationdesign/verificationdesign';
 const RAW_FIXTURE = 'https://raw.githubusercontent.com/verificationdesign/verificationdesign/';
 const REPO = resolve(process.cwd(), '..');
+const REVISION = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { cwd: REPO, encoding: 'utf8' }).trim();
+const sha256 = (body) => createHash('sha256').update(body).digest('hex');
 const CARDS_DIR = join(REPO, 'ai-design-patterns/cards');
 const DIST = resolve(process.cwd(), 'dist');
 const ORDER = [
@@ -87,7 +91,7 @@ function parseTwin(contents, path) {
       continue;
     }
     inRelated = false;
-    const scalar = line.match(/^([a-z]+): (.+)$/);
+    const scalar = line.match(/^([a-z_]+): (.+)$/);
     if (!scalar) {
       fail(`${path}: invalid frontmatter line: ${line}`);
       continue;
@@ -171,11 +175,20 @@ for (const [path, twin] of parsed) {
   if (twin.data.license !== 'CC BY 4.0') fail(`${path}: wrong or missing license`);
   const card = cards.find((item) => path === `patterns/${item.category}/${item.slug}.md`);
   if (path === 'principles.md') {
+    if (twin.data.source_url !== `${RAW_FIXTURE}${REVISION}/verification_design.md`) fail(`${path}: wrong source_url`);
+    if (twin.data.scope !== 'The complete reference document; the HTML Principles page is a shorter, illustrated overview.') fail(`${path}: wrong scope`);
     if (twin.data.source !== 'verification_design.md') fail(`${path}: wrong source`);
     const source = normalizeBody(await readFile(join(REPO, 'verification_design.md'), 'utf8'));
     bodiesCompared += 1;
     if (normalizeBody(twin.body) !== source) fail(`${path}: body differs from source`);
   } else if (card) {
+    if (twin.data.source_url !== `${RAW_FIXTURE}${REVISION}/${card.source}`) fail(`${path}: wrong source_url`);
+    let expectedDate;
+    try {
+      expectedDate = execFileSync('git', ['log', '-1', '--format=%cI', '--', card.source], { cwd: REPO, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim().split('T')[0];
+    } catch { /* Check archives against the build-date fallback. */ }
+    expectedDate ||= new Date().toISOString().split('T')[0];
+    if (twin.data.updated !== expectedDate) fail(`${path}: wrong updated date`);
     if (twin.data.source !== card.source) fail(`${path}: wrong source`);
     bodiesCompared += 1;
     if (normalizeBody(twin.body) !== card.sourceBody) fail(`${path}: body differs from source`);
@@ -294,6 +307,17 @@ for (const rule of headerRules) {
 }
 console.log(`Check 10 canonical headers: expected=${expected.size} found=${headerRules.length} unexpected=${headerRules.filter((rule) => !expected.has(rule.path)).length}`);
 
+const reverseLinks = [];
+let headerPath = '';
+for (const line of headers.split('\n')) {
+  if (line.startsWith('/')) headerPath = line;
+  const match = line.match(/^  Link: <([^>]+)>; rel="alternate"; type="text\/markdown"$/);
+  if (match) reverseLinks.push([headerPath, match[1]]);
+}
+const wantedReverse = [...expected].map((path) => [new URL(canonicalFor(path)).pathname, `${SITE}/${path}`]);
+if (JSON.stringify(reverseLinks.map(JSON.stringify).sort()) !== JSON.stringify(wantedReverse.map(JSON.stringify).sort())) fail('_headers: reverse alternate links differ');
+console.log(`Check 10 reverse headers: expected=${expected.size} found=${reverseLinks.length}`);
+
 function decodeHtml(value) {
   return value.replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
     .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
@@ -304,7 +328,16 @@ function sectionText(body, heading) {
   if (start < 0) return '';
   const contentStart = start + heading.length + 4;
   const end = body.indexOf('\n## ', contentStart);
-  return body.slice(contentStart, end < 0 ? undefined : end).trim().replace(/\s+/g, ' ');
+  return body.slice(contentStart, end < 0 ? undefined : end).trim();
+}
+
+function sectionBullets(body, heading) {
+  const result = [];
+  for (const line of sectionText(body, heading).split('\n')) {
+    if (/^[*-] /.test(line)) result.push(line.slice(2));
+    else if (/^[ \t]+\S/.test(line) && result.length) result[result.length - 1] += ` ${line.trim()}`;
+  }
+  return result.map((text) => text.replace(/[*_]/g, '').replace(/\s+/g, ' ').trim());
 }
 
 function sorted(value) {
@@ -371,19 +404,19 @@ const cardLine = (card) => `- [${card.title}](${SITE}/patterns/${card.category}/
 const expectedLlmsText = [
   '# Verification Design', '',
   "> Sourced principles and executable, stdlib-only Python pattern cards for verifying agent work: designing evals, checking tool-use output, and replacing self-review with external signals. Use when an agent must check its own or another agent's work.", '',
-  'Content is licensed under CC BY 4.0. Every `.md` link below is the source markdown for the matching HTML page.', '',
+  'Content is licensed under CC BY 4.0. Markdown links provide reference documents and generated indexes for the corresponding HTML pages.', '',
   '## Available representations', '',
   `- [llms.txt](${SITE}/llms.txt): This index. Fetch first.`,
   `- [llms-full.txt](${SITE}/llms-full.txt): The full corpus in one plain-text file: principles, all cards in reading order, references. Fetch when you need everything.`,
-  `- [catalog.json](${SITE}/catalog.json): Routing manifest: one record per card with title, intent, URLs, related cards, determinism move, observable signal, plus the failure map. Fetch to pick one card without loading the corpus.`,
+  `- [catalog.json](${SITE}/catalog.json): Versioned routing manifest with revision and content hashes; per-card title, intent, URLs, related cards, first-paragraph determinism move and observable signal, use_when and do_not_use_when lists, pattern_example and evidence_count coverage, plus the failure map. Coverage records are not research approval. Fetch to pick one card without loading the corpus.`,
   `- [patterns.md](${SITE}/patterns.md): Pattern index with the failure map. Fetch to choose a pattern from a symptom.`,
   `- [context-and-state.md](${SITE}/patterns/context-and-state.md): Index of the Context and State cards.`,
   `- [verification.md](${SITE}/patterns/verification.md): Index of the Verification cards.`,
   `- [orchestration.md](${SITE}/patterns/orchestration.md): Index of the Orchestration cards.`,
-  `- [principles.md](${SITE}/principles.md): The canonical principles document.`,
+  `- [principles.md](${SITE}/principles.md): The complete reference document; the HTML Principles page is a shorter, illustrated overview.`,
   `- [references.md](${SITE}/references.md): Deduplicated sources.`, '',
-  '## Principles', '', `- [Verification Design Principles](${SITE}/principles.md): The canonical principles document.`,
-  `- [Raw principles source](${RAW_FIXTURE}main/verification_design.md): The repository source file, raw markdown.`, '',
+  '## Principles', '', `- [Verification Design Principles](${SITE}/principles.md): The complete reference document; the HTML Principles page is a shorter, illustrated overview.`,
+  `- [Raw principles source](${RAW_FIXTURE}${REVISION}/verification_design.md): The repository source file, raw markdown.`, '',
   ...Object.entries(categoryLabels).flatMap(([category, title]) => [`## ${title}`, '', ...ORDER.map((id) => byId.get(id)).filter((card) => card.category === category).map(cardLine), '']),
   '## References', '', `- [References](${SITE}/references.md): Deduplicated sources and the pages that cite them.`, '',
   '## Source', '', `- [Repository](${REPO_FIXTURE}): Source repository.`, '- [License](https://creativecommons.org/licenses/by/4.0/): CC BY 4.0.', '',
@@ -400,12 +433,15 @@ let indexMismatches = 0;
 for (const [path, body] of expectedIndexes) if (normalizeBody(parsed.get(path)?.body ?? '') !== normalizeBody(body)) { indexMismatches += 1; fail(`${path}: exact normalized bytes differ`); }
 console.log(`Check 17 index twin bytes: files=${expectedIndexes.size} mismatches=${indexMismatches}`);
 
-const expectedCatalog = sorted({ generated: true, license: 'CC BY 4.0', site: SITE,
-  principles: { html_url: `${SITE}/principles/`, markdown_url: `${SITE}/principles.md`, source_url: `${RAW_FIXTURE}main/verification_design.md` },
+const expectedCatalog = sorted({ schema_version: 1, revision: REVISION, content_sha256: sha256(ordered.map((card) => card.sourceBody).join('')), generated: true, license: 'CC BY 4.0', site: SITE,
+  principles: { html_url: `${SITE}/principles/`, markdown_url: `${SITE}/principles.md`, source_url: `${RAW_FIXTURE}${REVISION}/verification_design.md` },
   cards: ordered.map((card) => ({ id: card.id, category: card.category, title: card.title, intent: card.intent,
-    html_url: `${SITE}/patterns/${card.id}/`, markdown_url: `${SITE}/patterns/${card.id}.md`, source_url: `${RAW_FIXTURE}main/${card.source}`,
+    html_url: `${SITE}/patterns/${card.id}/`, markdown_url: `${SITE}/patterns/${card.id}.md`, source_url: `${RAW_FIXTURE}${REVISION}/${card.source}`,
     related: [...(card.sourceBody.match(/##\s+Related Patterns\s*\n([\s\S]*?)(?=\n##\s|\n*$)/)?.[1] ?? '').matchAll(/\*\*([^*]+)\*\*/g)].map((match) => byTitle.get(match[1].trim().replace(/:$/, ''))?.id),
-    determinism_move: sectionText(card.sourceBody, 'Determinism Move'), observable_signal: sectionText(card.sourceBody, 'Observable Signal') })),
+    determinism_move: sectionText(card.sourceBody, 'Determinism Move').split(/\n\s*\n/)[0], observable_signal: sectionText(card.sourceBody, 'Observable Signal').split(/\n\s*\n/)[0],
+    use_when: sectionBullets(card.sourceBody, 'Use When'), do_not_use_when: sectionBullets(card.sourceBody, 'Do Not Use When'),
+    pattern_example: (card.sourceBody.split(/^### Pattern[^\n]*\n/m)[1] ?? '').split(/^## /m)[0].includes('```python\n') ? 'executable' : 'none',
+    evidence_count: sectionBullets(card.sourceBody, 'Evidence').length, source_sha256: sha256(card.sourceBody) })),
   failures: htmlFailures.map((entry) => ({ failure: entry.failure, shape: entry.shape, cards: entry.links.map((link) => link.href.replace(/^\/patterns\//, '').replace(/\/$/, '')) })),
 });
 const expectedCatalogText = `${JSON.stringify(expectedCatalog, null, 2)}\n`;

@@ -152,11 +152,14 @@ class Tracer:
         raise KeyError(f"Unknown run id: {run_id}")
 
     def path_to_root(self, run_id: UUID) -> list[UUID]:
-        path = [run_id]
-        parent = self.parent_of(run_id)
-        while parent is not None:
-            path.append(parent)
-            parent = self.parent_of(parent)
+        path = []
+        visited = set()
+        while run_id is not None:
+            if run_id in visited:
+                raise ValueError(f"parent cycle at {run_id}")
+            visited.add(run_id)
+            path.append(run_id)
+            run_id = self.parent_of(run_id)
         return path
 
     def check_tree(self) -> dict[str, int | bool]:
@@ -175,15 +178,32 @@ class Tracer:
         parent_conflicts = sum(
             1 for parents in parents_by_run.values() if len(parents) > 1
         )
+        cycles = set()
+        for run_id in known_ids:
+            # Follow each recorded parent, including conflicting parent links.
+            pending = [(run_id, [], set())]
+            while pending:
+                current, path, visited = pending.pop()
+                if current in visited:
+                    cycle = path[path.index(current):]
+                    first = min(range(len(cycle)), key=lambda i: cycle[i].int)
+                    cycles.add(tuple(cycle[first:] + cycle[:first]))
+                    continue
+                for parent in parents_by_run.get(current, set()):
+                    if parent is not None:
+                        pending.append((parent, path + [current], visited | {current}))
+        parent_cycles = len(cycles)
         return {
             "consistent": (
                 orphan_events == 0
                 and parent_conflicts == 0
                 and root_parent_errors == 0
+                and parent_cycles == 0
             ),
             "orphan_events": orphan_events,
             "parent_conflicts": parent_conflicts,
             "root_parent_errors": root_parent_errors,
+            "parent_cycles": parent_cycles,
         }
 
 
@@ -268,6 +288,7 @@ def render_report(
             "destination_tag_observed: shared_log_payload",
             f"tree_consistency: {'pass' if tree['consistent'] else 'fail'}",
             f"orphan_events: {tree['orphan_events']}",
+            f"parent_cycles: {tree['parent_cycles']}",
             f"destination_tag_missing: {destination_tag_missing}",
             f"id_generation_policy: {id_generation_policy}",
         ]
@@ -315,6 +336,7 @@ assert tracer.check_tree() == {
     "orphan_events": 0,
     "parent_conflicts": 0,
     "root_parent_errors": 0,
+    "parent_cycles": 0,
 }
 
 events_with_orphan = list(tracer.events)
@@ -331,6 +353,19 @@ orphan_demo.events = events_with_orphan
 assert orphan_demo.check_tree()["consistent"] is False
 assert orphan_demo.check_tree()["orphan_events"] == 1
 
+cycle_demo = Tracer()
+a, b = uuid4(), uuid4()
+cycle_demo.start("tool", run_id=a, parent_run_id=b)
+cycle_demo.start("tool", run_id=b, parent_run_id=a)
+assert cycle_demo.check_tree()["consistent"] is False
+assert cycle_demo.check_tree()["parent_cycles"] == 1
+try:
+    cycle_demo.path_to_root(a)
+except ValueError as error:
+    assert str(error) == f"parent cycle at {a}"
+else:
+    raise AssertionError("cyclic ancestry must fail")
+
 expected_report = """root_run_id: a001
 event: agent.start run: a001 parent: null tag_present: trace_store
 event: tool.start run: b002 parent: a001 tag_present: trace_store
@@ -339,6 +374,7 @@ propagation_surfaces_checked: trace_store, shared_log_payload
 destination_tag_observed: shared_log_payload
 tree_consistency: pass
 orphan_events: 0
+parent_cycles: 0
 destination_tag_missing: 1
 id_generation_policy: caller_supplied"""
 
@@ -369,7 +405,7 @@ Every Causal Tag report should include:
 * propagation surfaces checked, such as trace store, log payload, message attribute, API header;
 * tag presence per surface;
 * tree consistency result;
-* orphan-event count and destination-tag-miss count;
+* orphan-event count, parent-cycle count, and destination-tag-miss count;
 * ID generation policy (`caller_supplied`, `framework_assigned`, `uuid_on_missing`).
 
 A useful report is a small join table:
@@ -383,12 +419,14 @@ propagation_surfaces_checked: trace_store, shared_log_payload
 destination_tag_observed: shared_log_payload
 tree_consistency: pass
 orphan_events: 0
+parent_cycles: 0
 destination_tag_missing: 1
 id_generation_policy: caller_supplied
 ```
 
 ## Failure Modes
 
+* **Cyclic Parent Links:** An event's ancestry loops back on itself, usually from retries or handlers that reuse a run ID as their own parent. A tree check that only tests orphans and conflicts reports the loop as consistent, and any root walk hangs. Detect revisits and fail the tree.
 * **Time-Window Attribution:** Tests filter shared logs by path and timestamp. Any matching event after the start time can satisfy the assertion. Include a unique tag in the payload and require the observed event to carry it.
 * **Framework Bypass:** The framework offers `run_id` and `parent_run_id`, but custom code emits events outside that path. Use the framework callback or explicitly propagate the IDs.
 * **Flat ID Tree:** Every event has an ID, but no parent link. The verifier sees a bag of events, not a causal chain. Record parent IDs and assert tree consistency.
