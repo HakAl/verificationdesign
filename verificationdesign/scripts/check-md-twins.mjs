@@ -337,7 +337,7 @@ function sectionBullets(body, heading) {
     if (/^[*-] /.test(line)) result.push(line.slice(2));
     else if (/^[ \t]+\S/.test(line) && result.length) result[result.length - 1] += ` ${line.trim()}`;
   }
-  return result.map((text) => text.replace(/[*_]/g, '').replace(/\s+/g, ' ').trim());
+  return result.map((text) => text.replace(/[*`]/g, '').replace(/\s+/g, ' ').replace(/;\s*$/, '').trim());
 }
 
 function sorted(value) {
@@ -408,7 +408,7 @@ const expectedLlmsText = [
   '## Available representations', '',
   `- [llms.txt](${SITE}/llms.txt): This index. Fetch first.`,
   `- [llms-full.txt](${SITE}/llms-full.txt): The full corpus in one plain-text file: principles, all cards in reading order, references. Fetch when you need everything.`,
-  `- [catalog.json](${SITE}/catalog.json): Versioned routing manifest with revision and content hashes; per-card title, intent, URLs, related cards, first-paragraph determinism move and observable signal, use_when and do_not_use_when lists, pattern_example and evidence_count coverage, plus the failure map. Coverage records are not research approval. Fetch to pick one card without loading the corpus.`,
+  `- [catalog.json](${SITE}/catalog.json): Versioned routing manifest with revision and content hashes; per-card title, intent, URLs, related cards, first-paragraph determinism move, observable signal report fields, use_when and do_not_use_when lists, pattern_example and evidence_count coverage, plus the failure map. Coverage records are not research approval. Fetch to pick one card without loading the corpus.`,
   `- [patterns.md](${SITE}/patterns.md): Pattern index with the failure map. Fetch to choose a pattern from a symptom.`,
   `- [context-and-state.md](${SITE}/patterns/context-and-state.md): Index of the Context and State cards.`,
   `- [verification.md](${SITE}/patterns/verification.md): Index of the Verification cards.`,
@@ -438,7 +438,7 @@ const expectedCatalog = sorted({ schema_version: 1, revision: REVISION, content_
   cards: ordered.map((card) => ({ id: card.id, category: card.category, title: card.title, intent: card.intent,
     html_url: `${SITE}/patterns/${card.id}/`, markdown_url: `${SITE}/patterns/${card.id}.md`, source_url: `${RAW_FIXTURE}${REVISION}/${card.source}`,
     related: [...(card.sourceBody.match(/##\s+Related Patterns\s*\n([\s\S]*?)(?=\n##\s|\n*$)/)?.[1] ?? '').matchAll(/\*\*([^*]+)\*\*/g)].map((match) => byTitle.get(match[1].trim().replace(/:$/, ''))?.id),
-    determinism_move: sectionText(card.sourceBody, 'Determinism Move').split(/\n\s*\n/)[0], observable_signal: sectionText(card.sourceBody, 'Observable Signal').split(/\n\s*\n/)[0],
+    determinism_move: sectionText(card.sourceBody, 'Determinism Move').split(/\n\s*\n/)[0], observable_signal: sectionBullets(card.sourceBody, 'Observable Signal'),
     use_when: sectionBullets(card.sourceBody, 'Use When'), do_not_use_when: sectionBullets(card.sourceBody, 'Do Not Use When'),
     pattern_example: (card.sourceBody.split(/^### Pattern[^\n]*\n/m)[1] ?? '').split(/^## /m)[0].includes('```python\n') ? 'executable' : 'none',
     evidence_count: sectionBullets(card.sourceBody, 'Evidence').length, source_sha256: sha256(card.sourceBody) })),

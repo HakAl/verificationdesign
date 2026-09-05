@@ -44,7 +44,7 @@ function firstParagraph(body, heading) {
 
 function bullets(body, heading) {
   return [...extractSection(body, heading).matchAll(/^[*-] (.+(?:\n[ \t]+.+)*)/gm)]
-    .map((match) => match[1].replace(/[*_]/g, '').replace(/\s+/g, ' ').trim());
+    .map((match) => match[1].replace(/\*\*|\*|`/g, '').replace(/\s+/g, ' ').trim().replace(/;$/, ''));
 }
 
 function sortKeys(value) {
@@ -238,7 +238,7 @@ const llms = [
   '',
   `- [llms.txt](${SITE}/llms.txt): This index. Fetch first.`,
   `- [llms-full.txt](${SITE}/llms-full.txt): The full corpus in one plain-text file: principles, all cards in reading order, references. Fetch when you need everything.`,
-  `- [catalog.json](${SITE}/catalog.json): Versioned routing manifest with revision and content hashes; per-card title, intent, URLs, related cards, first-paragraph determinism move and observable signal, use_when and do_not_use_when lists, pattern_example and evidence_count coverage, plus the failure map. Coverage records are not research approval. Fetch to pick one card without loading the corpus.`,
+  `- [catalog.json](${SITE}/catalog.json): Versioned routing manifest with revision and content hashes; per-card title, intent, URLs, related cards, first-paragraph determinism move, observable signal report fields, use_when and do_not_use_when lists, pattern_example and evidence_count coverage, plus the failure map. Coverage records are not research approval. Fetch to pick one card without loading the corpus.`,
   `- [patterns.md](${SITE}/patterns.md): Pattern index with the failure map. Fetch to choose a pattern from a symptom.`,
   `- [context-and-state.md](${SITE}/patterns/context-and-state.md): Index of the Context and State cards.`,
   `- [verification.md](${SITE}/patterns/verification.md): Index of the Verification cards.`,
@@ -317,7 +317,7 @@ const catalog = {
       return target.id;
     }),
     determinism_move: firstParagraph(card.body, 'Determinism Move'),
-    observable_signal: firstParagraph(card.body, 'Observable Signal'),
+    observable_signal: bullets(card.body, 'Observable Signal'),
     use_when: bullets(card.body, 'Use When'),
     do_not_use_when: bullets(card.body, 'Do Not Use When'),
     pattern_example: /### Pattern[^\n]*\n(?:(?!\n###? )[^])*?```python\n/.test(card.body) ? 'executable' : 'none',
