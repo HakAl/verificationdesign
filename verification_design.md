@@ -2,6 +2,8 @@
 
 Reference document for building systems that guide agents through end-to-end verification. Based on published research in LLM self-correction, verification chains, and agent evaluation.
 
+These principles are engineering judgment, informed by the cited research. They guide design decisions; they are not universal guarantees. They are revised as evidence and experience warrant.
+
 ## The Core Finding
 
 **LLMs cannot reliably self-correct their own reasoning without external feedback.**
