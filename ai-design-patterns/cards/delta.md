@@ -10,7 +10,7 @@ Also known as: Baseline Assertion, Relative State Verification, Ambient Isolatio
 
 ## Intent
 
-Verify the success of an agent's actions by asserting on the *change* in environment state rather than the *absolute* environment state.
+Check whether the observed change in environment state satisfies an action's expected postcondition; attribution to that action requires isolation or a propagated causal tag.
 
 ## Problem
 

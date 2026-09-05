@@ -10,7 +10,7 @@ Also known as: Causal ID, Run ID Propagation, Invocation Tag, Event Parentage.
 
 ## Intent
 
-Stamp every event the agent emits with a stable joinable identifier and, when applicable, a parent identifier, so verification can attribute observed effects to specific agent actions rather than inferring causality from temporal proximity in shared ambient state.
+Stamp emitted events with stable joinable identifiers and parent links, then join destination observations to recorded actions; causal attribution depends on trustworthy tag generation and propagation.
 
 ## Problem
 
