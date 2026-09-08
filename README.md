@@ -11,6 +11,7 @@ Agentic systems fail in a recognizable way: the agent says done, and the work is
 - [`verification_design.md`](verification_design.md): nine principles for verification design, presented as a curated position paper. Every empirical claim carries an inline citation and a matching row in the References table. New evidence is held in `research/synthesis.md` until folded by the maintainer.
 - [`ai-design-patterns/`](ai-design-patterns/): a catalog of 17 pattern cards in three families (Context and State, Verification, Orchestration). Cards follow the canonical Problem, Forces, and Solution pattern form, with GoF's Intent and Related Patterns. Each card pairs a Pattern with an Antipattern, names the failure it controls, and states the observable signal it produces. Pattern code is Python, standard library only, and must execute.
 - [`verificationdesign/`](verificationdesign/): the Astro site that publishes both. The site reads cards directly from the catalog; there is no second copy of the content.
+- [`skills/`](skills/README.md): two operator-invoked Agent Skills, `verification-design` and `verification-audit`, that apply the principles and cards to your own work from a pinned catalog snapshot. Explicit invocation only by default.
 - [`research/`](research/): the supply chain for the principles. Mechanical arXiv discovery, first-pass triage, and graded source reviews, in that order, before anything reaches the canonical doc.
 
 ## The repo enforces its own rules

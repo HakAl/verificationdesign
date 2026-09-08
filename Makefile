@@ -1,4 +1,4 @@
-.PHONY: help check verify verify-local patterns site site-build site-check site-lint-cards site-a11y site-dev site-preview site-smoke
+.PHONY: help check verify verify-local skills patterns site site-build site-check site-lint-cards site-a11y site-dev site-preview site-smoke
 
 SITE_DIR := verificationdesign
 
@@ -6,8 +6,9 @@ help:
 	@printf '%s\n' \
 		'Targets:' \
 		'  make check            Run repo verification and full website verification' \
-		'  make verify           Run full repo verifier, including link liveness' \
-		'  make verify-local     Run repo verifier without network link checks' \
+		'  make verify           Run repo and skills checks, including link liveness' \
+		'  make verify-local     Run repo and skills checks without network link checks' \
+		'  make skills           Check skills, corpus pins, fixtures and loopback tests' \
 		'  make patterns         Lint AI design pattern cards' \
 		'  make site             Run full website verification' \
 		'  make site-build       Build the Astro website' \
@@ -22,9 +23,14 @@ check: site verify
 
 verify:
 	python3 scripts/verify.py
+	python3 scripts/check_skills.py --links
 
 verify-local:
 	python3 scripts/verify.py --skip-links
+	python3 scripts/check_skills.py
+
+skills:
+	python3 scripts/check_skills.py
 
 patterns:
 	python3 ai-design-patterns/scripts/lint_patterns.py

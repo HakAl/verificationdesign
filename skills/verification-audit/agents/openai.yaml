@@ -1,0 +1,5 @@
+interface:
+  display_name: "Verification audit"
+  short_description: "Audit an artifact against the verification principles"
+policy:
+  allow_implicit_invocation: false

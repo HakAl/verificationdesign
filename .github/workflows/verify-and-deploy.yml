@@ -23,6 +23,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - uses: actions/setup-python@v5
         with:
@@ -40,6 +41,9 @@ jobs:
       # before push because cloud runner IPs are blocked by publishers/arXiv.
       - name: Repo verifier (hermetic; link liveness gated locally pre-push)
         run: python3 scripts/verify.py --skip-links
+
+      - name: Verification skills (hermetic)
+        run: python3 scripts/check_skills.py
 
   site:
     needs: verify

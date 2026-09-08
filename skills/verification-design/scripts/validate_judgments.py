@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Validate recorded applicability judgments against the pinned catalog."""
+import sys
+sys.dont_write_bytecode = True
+from load_catalog import cli_main, emit, load_catalog, parser, read_record
+
+VERDICTS = {"holds", "does-not-hold", "unknown"}
+
+
+def nonempty(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def decision(use, exclude):
+    if "holds" in exclude or all(v == "does-not-hold" for v in use):
+        return "reject"
+    if "holds" in use and all(v == "does-not-hold" for v in exclude):
+        return "apply"
+    return "undecided"
+
+
+def validate(record, catalog=None):
+    if catalog is None:
+        catalog, _ = load_catalog()
+    errors = []
+    def fail(card, rule, message):
+        errors.append({"card": card, "rule": rule, "message": message})
+    if not isinstance(record, dict):
+        fail(None, "structure", "record must be an object")
+        return errors
+    for key in ("corpus_revision", "artifact", "scope"):
+        if not nonempty(record.get(key)):
+            fail(None, "structure", key + " must be a non-empty string")
+    if record.get("corpus_revision") != catalog["revision"]:
+        fail(None, "structure", "corpus_revision must equal the snapshot revision")
+    if isinstance(record.get("scope"), str) and len(record["scope"].splitlines()) != 1:
+        fail(None, "structure", "scope must be one line")
+    workflow = record.get("workflow")
+    if not isinstance(workflow, dict):
+        fail(None, "structure", "workflow must be an object")
+    else:
+        for key in ("generated", "generator", "completion_signal"):
+            if not nonempty(workflow.get(key)):
+                fail(None, "structure", "workflow." + key + " must be a non-empty string")
+        points = workflow.get("self_review_points")
+        if not isinstance(points, list) or any(not nonempty(p) for p in points):
+            fail(None, "structure", "workflow.self_review_points must be a list of non-empty strings")
+    cards = record.get("cards")
+    if not isinstance(cards, list):
+        fail(None, "structure", "cards must be a list")
+        return errors
+    for card in cards:
+        if not isinstance(card, dict) or not nonempty(card.get("id")):
+            fail(None, "structure", "each card needs an id")
+            continue
+        if not nonempty(card.get("reason")):
+            fail(card["id"], "structure", "reason must be non-empty")
+        for group in ("use_when", "do_not_use_when"):
+            if not isinstance(card.get(group), list) or any(not isinstance(c, dict) for c in card[group]):
+                fail(card["id"], "structure", group + " must be a list of condition objects")
+    if errors:
+        return errors
+    expected_ids = [c["id"] for c in catalog["cards"]]
+    ids = [c["id"] for c in cards]
+    for cid in sorted(set(expected_ids + ids)):
+        if cid not in expected_ids or ids.count(cid) != 1:
+            fail(cid, "coverage", "every catalog card must appear exactly once; unknown ids are forbidden")
+    if errors:
+        return errors
+    by_id = {c["id"]: c for c in cards}
+    for source in catalog["cards"]:
+        card = by_id[source["id"]]
+        for group in ("use_when", "do_not_use_when"):
+            if [c.get("condition") for c in card[group]] != source[group]:
+                fail(card["id"], "conditions", group + " must match every catalog condition verbatim in catalog order")
+    if errors:
+        return errors
+    for card in cards:
+        for group in ("use_when", "do_not_use_when"):
+            for condition in card[group]:
+                verdict = condition.get("verdict")
+                if not isinstance(verdict, str) or verdict not in VERDICTS:
+                    fail(card["id"], "verdicts", "verdict must be holds, does-not-hold or unknown")
+                if not isinstance(condition.get("evidence"), str) or (verdict != "unknown" and not nonempty(condition["evidence"])):
+                    fail(card["id"], "verdicts", "non-unknown verdicts require non-empty evidence; evidence must be a string")
+    if errors:
+        return errors
+    for card in cards:
+        expected = decision([c["verdict"] for c in card["use_when"]], [c["verdict"] for c in card["do_not_use_when"]])
+        if card.get("decision") != expected:
+            explanation = {
+                "apply": "at least one use_when holds and every exclusion does-not-hold",
+                "reject": "an exclusion holds or every use_when does-not-hold",
+                "undecided": "unresolved applicability or an unknown exclusion blocks apply",
+            }[expected]
+            fail(card["id"], "decision-" + expected, "expected " + expected + ": " + explanation)
+    return errors
+
+
+def main():
+    p = parser(__doc__, "python3 scripts/validate_judgments.py record.json")
+    p.add_argument("record", help="JSON judgment record")
+    args = p.parse_args()
+    record = read_record(args.record)
+    errors = validate(record)
+    if errors:
+        emit(errors)
+        print("judgment validation failed", file=sys.stderr)
+        return 3
+    emit(dict(valid=True, cards=len(record["cards"]), **{
+        d: sum(c["decision"] == d for c in record["cards"]) for d in ("apply", "reject", "undecided")}))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(cli_main(main))

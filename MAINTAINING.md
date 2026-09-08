@@ -56,6 +56,32 @@ Before site work is considered done, run:
 
 Deployment target is Cloudflare Pages with root directory `verificationdesign`, build command `npm run build`, and output directory `dist`.
 
+## Skills package
+
+`skills/` contains self-contained verification-design and verification-audit Agent
+Skills, each with a packaged catalog, scripts and references; repo-side fixtures
+exercise validation, routing and rendering. Python 3.11 or later is required.
+Install and invocation details are in [skills/README.md](skills/README.md).
+
+Re-pin as a deliberate release: tag the chosen corpus commit with `corpus/vX.Y.Z`.
+At that commit, run `GITHUB_SHA=<pin> node scripts/build-md-twins.mjs` from
+`verificationdesign/` after the site build. Copy the emitted `dist/catalog.json`
+byte for byte into both skills. Update the five metadata fields in both SKILL.md
+files: version, corpus-revision, corpus-tag, catalog-sha256 and principles-sha256.
+The catalog hash is over file bytes; source hashes normalize UTF-8 CRLF to LF,
+strip trailing newlines and append exactly one LF. Bump the skills version (at least
+minor for a re-pin), refresh affected records and expected outputs, update CHANGELOG,
+and tag the reviewed skills release with `skills/vX.Y.Z`. The maintainer owns tags
+and release decisions.
+
+Run `python3 scripts/check_skills.py` for hermetic pin, fixture and loopback HTTP
+tests; `--links` adds live URL and source-hash checks, and `--skills-ref` invokes the
+pinned reference validator using uvx on a temporary copy with only the top-level
+invocation flag removed. The last two checks require network and run locally, not
+in CI. `make skills` and `make verify-local` run the hermetic checker; `make verify`
+also runs live checks. A sandbox that refuses a loopback bind cannot pass the
+retrieval tests; run them on the maintainer's host and report the failure explicitly.
+
 ## Commands
 
 - `make help`: list top-level repo commands.

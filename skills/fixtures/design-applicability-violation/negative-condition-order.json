@@ -1,0 +1,946 @@
+{
+  "corpus_revision": "e632a86b2ca8fbb7f83b3130ba083784c7817667",
+  "artifact": "skills/fixtures/design-applicability-violation/artifact",
+  "scope": "Verify the pure square function against its exact integer specification.",
+  "workflow": {
+    "generated": "A pure Python square function.",
+    "generator": "A one-shot code-generating agent.",
+    "completion_signal": "Existing local equality assertions exit successfully.",
+    "self_review_points": []
+  },
+  "cards": [
+    {
+      "id": "context-and-state/constitution",
+      "use_when": [
+        {
+          "condition": "multiple agents or tools evaluate the same artifact",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        },
+        {
+          "condition": "verification reports need to be auditable",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        },
+        {
+          "condition": "criteria drift is causing inconsistent judgments",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        },
+        {
+          "condition": "prompts contain repeated pass/fail language",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        },
+        {
+          "condition": "failures must be compared across runs",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        },
+        {
+          "condition": "human reviewers need to know what the system actually checked.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the workflow is exploratory and no criteria are known yet",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        },
+        {
+          "condition": "a single human is manually reviewing one-off output",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        },
+        {
+          "condition": "the criteria are intentionally subjective and cannot yet be operationalized.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+        }
+      ],
+      "decision": "reject",
+      "reason": "The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+    },
+    {
+      "id": "context-and-state/guardrail-decorator",
+      "use_when": [
+        {
+          "condition": "the framework supports lifecycle hooks at model, tool, retriever, or output boundaries",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        },
+        {
+          "condition": "policy enforcement gates side effects such as file writes, network calls, deletions, charges, sends, or deploys",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        },
+        {
+          "condition": "policy needs to survive prompt rewrites, persona tests, and context compaction",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        },
+        {
+          "condition": "audit requires a decision log per call",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        },
+        {
+          "condition": "the policy can be expressed as a deterministic decision function rather than a subjective judgment.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the policy is genuinely subjective and a Judge Harness is the right verifier",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        },
+        {
+          "condition": "the framework's call boundaries cannot be wrapped",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        },
+        {
+          "condition": "a one-off conditional in the call site is clearer than registering a decorator",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        },
+        {
+          "condition": "shape normalization is the actual need, which belongs on Tool Adapter.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+        }
+      ],
+      "decision": "reject",
+      "reason": "No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers."
+    },
+    {
+      "id": "context-and-state/causal-tag",
+      "use_when": [
+        {
+          "condition": "the agent emits events into shared logs, traces, message buses, APIs, or side-effect targets",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        },
+        {
+          "condition": "multiple agents, runs, or producers share the same event surface",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        },
+        {
+          "condition": "async timing, batching, or reordering makes temporal proximity unreliable",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        },
+        {
+          "condition": "verification must attribute an observed effect to a specific action",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        },
+        {
+          "condition": "a framework tracing layer exists but is not yet engaged.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the event surface is fully private to the test or run",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        },
+        {
+          "condition": "State Baseline plus Delta gives equivalent attribution more cheaply",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        },
+        {
+          "condition": "the boundary cannot carry any metadata and cannot be changed",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        },
+        {
+          "condition": "the side effect is low stakes and misattribution cost is negligible.",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: No shared event surface or asynchronous work exists; each result is a private function return."
+        }
+      ],
+      "decision": "reject",
+      "reason": "No shared event surface or asynchronous work exists; each result is a private function return."
+    },
+    {
+      "id": "context-and-state/trajectory-cursor",
+      "use_when": [
+        {
+          "condition": "an agent runs more than two tool calls per task",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        },
+        {
+          "condition": "permission, retry, fallback, or denial paths exist outside the main action flow",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        },
+        {
+          "condition": "verification needs to prove which steps executed, not which the agent narrated",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        },
+        {
+          "condition": "a loop can stall, repeat, or skip required actions",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        },
+        {
+          "condition": "pause, replay, or human-in-the-loop resume matters.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the workflow is a single-shot model call with no loop",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        },
+        {
+          "condition": "the framework already persists a structured trajectory and another cursor would duplicate state",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        },
+        {
+          "condition": "the process is a deterministic transformation pipeline with no agent decisions",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        },
+        {
+          "condition": "the only verification question is final-state causality, where State Baseline or Delta is enough.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+        }
+      ],
+      "decision": "reject",
+      "reason": "Generation is one-shot and the check has no agent decisions, retries or pause/resume path."
+    },
+    {
+      "id": "context-and-state/state-baseline",
+      "use_when": [
+        {
+          "condition": "the environment is shared, persistent, or reused across runs",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "a pre-existing object could satisfy the post-condition",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "concurrent activity can create, delete, or mutate matching state",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "the action is destructive and needs an audit trail",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "the verifier needs to prove causation, not merely observe a final condition.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the environment is fully ephemeral and recreated for each run",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "the state surface is too large and the assertion is low stakes",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "the verified property is purely internal to a deterministic function call",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "a Causal Tag can identify the agent's own artifacts more directly",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        },
+        {
+          "condition": "a pre-state read would itself change the system under test.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The property is internal to a deterministic function; there is no mutable environment."
+        }
+      ],
+      "decision": "reject",
+      "reason": "The property is internal to a deterministic function; there is no mutable environment."
+    },
+    {
+      "id": "verification/executable-analog",
+      "use_when": [
+        {
+          "condition": "the claim being verified can be expressed as a deterministic check",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        },
+        {
+          "condition": "the output has structure (DOM, JSON, exit code, log line) that can be queried",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        },
+        {
+          "condition": "you can write a test rather than just describe one",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        },
+        {
+          "condition": "the same check will run repeatedly (regression, CI, multi-agent loops)",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        },
+        {
+          "condition": "the verification trail needs to be auditable.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the property is genuinely subjective and has no programmatic surface (tone, readability, design taste)",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        },
+        {
+          "condition": "the extractor would be more brittle than the LLM judgment it replaces",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        },
+        {
+          "condition": "the cost of writing the executable check exceeds the cost of one-off human review",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        },
+        {
+          "condition": "the claim is exploratory and \"good\" is not yet defined.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+        }
+      ],
+      "decision": "apply",
+      "reason": "An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+    },
+    {
+      "id": "verification/blind-oracle",
+      "use_when": [
+        {
+          "condition": "the property under check has a derivable expected value, such as math, parses, structural counts, or executable checks",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        },
+        {
+          "condition": "false positives from draft-anchored judgment are a known failure mode",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        },
+        {
+          "condition": "the spec or reference can be processed independently of the draft",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        },
+        {
+          "condition": "generation and verification share a context window",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        },
+        {
+          "condition": "the verifier is LLM-based and could otherwise be conditioned on the draft.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "expected cannot be derived without reading the draft",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        },
+        {
+          "condition": "Executable Analog can specialize the pattern with compilation, execution, or runtime traces",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        },
+        {
+          "condition": "no expected exists and the right pattern is Admissibility Gate or a calibrated Judge Harness",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        },
+        {
+          "condition": "the artifact and the spec are the same object and derivation must reference the artifact.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+        }
+      ],
+      "decision": "reject",
+      "reason": "Expected can be derived, but the executable assertion specializes the pattern and no model judge is used."
+    },
+    {
+      "id": "verification/comparator",
+      "use_when": [
+        {
+          "condition": "the observed value can be extracted separately from the comparison",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        },
+        {
+          "condition": "the check has a known expected value, pattern, reference object, or expected event sequence",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        },
+        {
+          "condition": "a named operator covers the comparison or can be defined cheaply",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        },
+        {
+          "condition": "the report must be auditable without rerunning a model",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        },
+        {
+          "condition": "the same comparison will run repeatedly in CI, regression tests, or agent loops.",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the answer is genuinely open-ended and no reference exists",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        },
+        {
+          "condition": "semantic equivalence is the actual task and a tight comparator would reject acceptable answers",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        },
+        {
+          "condition": "designing a comparator costs more than a one-off human review",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:18-19 explicitly states that a general Comparator costs more than one-off human review."
+        },
+        {
+          "condition": "the comparison needs a calibrated model judge. Use Judge Harness instead of an inline fused judgment.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Expected and observed integers are separate and equality is the named comparison operator."
+        }
+      ],
+      "decision": "reject",
+      "reason": "The one-off cost exclusion holds despite applicable comparison conditions."
+    },
+    {
+      "id": "verification/delta",
+      "use_when": [
+        {
+          "condition": "the environment is shared, persistent, or carries non-trivial pre-existing state",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        },
+        {
+          "condition": "the metric being measured exists in the environment before the agent acts",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        },
+        {
+          "condition": "concurrent activity is possible and the metric can be scoped, locked, or paired with Causal Tag",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        },
+        {
+          "condition": "the assertion needs to prove the state changed during the agent's verification window, with causal attribution handled by scoping, exclusive access, or Causal Tag when concurrency is present.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the environment is fully ephemeral (fresh container per run, mocked DB)",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        },
+        {
+          "condition": "the metric does not exist pre-action and only the absolute post-state is meaningful",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        },
+        {
+          "condition": "you cannot capture a baseline before the agent acts (e.g., the agent is invoked black-box)",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        },
+        {
+          "condition": "the action is destructive or non-replayable and a pre-state read would alter the outcome.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No environmental metric or mutation exists; the only observation is a private function return."
+        }
+      ],
+      "decision": "reject",
+      "reason": "No environmental metric or mutation exists; the only observation is a private function return."
+    },
+    {
+      "id": "verification/judge-harness",
+      "use_when": [
+        {
+          "condition": "the verification path uses an LLM-based judge",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        },
+        {
+          "condition": "the verdict is high leverage, such as a gate for promotion, training, deployment, or automation",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        },
+        {
+          "condition": "false positives or false negatives are costly enough to justify multi-sample budget",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        },
+        {
+          "condition": "human labels exist or can be collected for a calibration set",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        },
+        {
+          "condition": "the judge family has documented bias modes that can be perturbed against.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "verification is fully executable, so an Executable Analog or Comparator can decide it without an LLM",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        },
+        {
+          "condition": "the verdict is low leverage and a single-sample judge call is proportionate",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        },
+        {
+          "condition": "no calibration set can be obtained and the harness would aggregate without an anchor",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        },
+        {
+          "condition": "the budget for repetitions is unavailable and the alternative is no judge at all.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: Verification is executable and low stakes; no model judge or calibration set exists."
+        }
+      ],
+      "decision": "reject",
+      "reason": "Verification is executable and low stakes; no model judge or calibration set exists."
+    },
+    {
+      "id": "verification/admissibility-gate",
+      "use_when": [
+        {
+          "condition": "the verifier checks work produced by an LLM",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "false approvals are more costly than false rejections",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "the task has known shortcut paths or lookalike evidence",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "generation and verification share a model family or context",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "the rubric will be reused across many runs.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the task is genuinely iterative and evaluator-optimizer is the desired loop",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "the output is exploratory and no one has defined what \"wrong\" means yet",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "strict admissibility would reject too many acceptable answers",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "a named Comparator or Executable Analog can decide the check directly",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        },
+        {
+          "condition": "the right escalation is a calibrated Judge Harness around a subjective property.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The generated function has a directly executable correctness check; no model approval is needed."
+        }
+      ],
+      "decision": "reject",
+      "reason": "The generated function has a directly executable correctness check; no model approval is needed."
+    },
+    {
+      "id": "orchestration/cross-family",
+      "use_when": [
+        {
+          "condition": "an LLM-based judge or evaluator is on the verification path",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        },
+        {
+          "condition": "the same provider serves both generation and verification by default",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        },
+        {
+          "condition": "the verification result gates promotion, training, deployment, or downstream automation",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        },
+        {
+          "condition": "optimization-time advice steers a model being shaped",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        },
+        {
+          "condition": "audit context requires verifier identity to be recorded.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "verification is fully executable, so an Executable Analog or Comparator can decide it without an LLM judge",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        },
+        {
+          "condition": "only one provider is reachable and provider diversity cannot be added",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        },
+        {
+          "condition": "the verification is low leverage and misattribution cost is negligible",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        },
+        {
+          "condition": "the boundary cannot carry verifier identity metadata.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model judge evaluates the result; the local assertion decides it."
+        }
+      ],
+      "decision": "reject",
+      "reason": "No model judge evaluates the result; the local assertion decides it."
+    },
+    {
+      "id": "orchestration/adversary",
+      "use_when": [
+        {
+          "condition": "a single proposer's blind spots are costly",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        },
+        {
+          "condition": "the workflow can afford a second role",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        },
+        {
+          "condition": "the system needs an explicit failure-search step before release",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        },
+        {
+          "condition": "the critique should create a routable artifact, not only prose",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        },
+        {
+          "condition": "later Backpressure, Escalation Chain, or Debate steps need a negative signal.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the task is trivial and a second role would add process noise",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        },
+        {
+          "condition": "the critic would be the same model, same prompt context, and same family, with no recorded independence",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        },
+        {
+          "condition": "an Executable Analog or Comparator can decide the property without an LLM critic",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        },
+        {
+          "condition": "the desired structure is multi-round disagreement among several roles. Use Debate for that.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without a critic role."
+        }
+      ],
+      "decision": "reject",
+      "reason": "The executable comparison decides the property without a critic role."
+    },
+    {
+      "id": "orchestration/debate",
+      "use_when": [
+        {
+          "condition": "a high-stakes decision benefits from several perspectives",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        },
+        {
+          "condition": "a single Adversary pass is too narrow",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        },
+        {
+          "condition": "the system can afford multiple roles and bounded rounds",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        },
+        {
+          "condition": "the decision needs an auditable vote, threshold, or turn record",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        },
+        {
+          "condition": "unresolved disagreement should route to Escalation Chain or Backpressure.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "a single critic is enough. Use Adversary",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        },
+        {
+          "condition": "an Executable Analog or Comparator can decide the property directly",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        },
+        {
+          "condition": "token, latency, or provider cost cannot support multiple turns",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        },
+        {
+          "condition": "all debaters are the same model, same prompt, and same family, with no recorded diversity.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The executable comparison decides the property without rounds or votes."
+        }
+      ],
+      "decision": "reject",
+      "reason": "The executable comparison decides the property without rounds or votes."
+    },
+    {
+      "id": "orchestration/escalation-chain",
+      "use_when": [
+        {
+          "condition": "failures or low-confidence decisions should route to a more capable handler",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "the system has tiers, specialists, managers, or humans",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "the next handler must be auditable",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "unresolved Adversary or Debate findings need a stronger route",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "same-family retry would be insufficient evidence of independence.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "a flat single-handler design is enough",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "an Executable Analog or Comparator can decide the property without routing",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "the proposed target is the same model, same prompt, and same family",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "there is no owner capable of handling the escalated work",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        },
+        {
+          "condition": "the chain cannot enforce a maximum depth.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: A failed check stops the local run; no handler hierarchy or automatic routing exists."
+        }
+      ],
+      "decision": "reject",
+      "reason": "A failed check stops the local run; no handler hierarchy or automatic routing exists."
+    },
+    {
+      "id": "orchestration/backpressure",
+      "use_when": [
+        {
+          "condition": "a downstream verifier can fail recoverably",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "the upstream step can consume corrective feedback",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "bounded automatic revision is cheaper than immediate escalation",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "a recorded retry trail is useful for audit or debugging",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "an Adversary, Comparator, or guardrail can produce a concrete failure reason.",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the failure is non-recoverable and should escalate immediately",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "the upstream step cannot consume feedback",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "an Executable Analog passes deterministically without revision",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "retry cost is unacceptable",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        },
+        {
+          "condition": "the verifier cannot state what failed.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: The one-shot generator cannot consume check feedback; no revision loop is requested."
+        }
+      ],
+      "decision": "reject",
+      "reason": "The one-shot generator cannot consume check feedback; no revision loop is requested."
+    },
+    {
+      "id": "orchestration/tool-adapter",
+      "use_when": [
+        {
+          "condition": "a model calls tools with structured arguments",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        },
+        {
+          "condition": "tools have typed functions or external protocol schemas",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        },
+        {
+          "condition": "malformed arguments could cause side effects",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        },
+        {
+          "condition": "audit requires a single owner for tool format",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        },
+        {
+          "condition": "observations need to be consumed by later verification or trajectory steps.",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "there is a single trivial tool with no arguments",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        },
+        {
+          "condition": "the framework already provides a typed tool boundary and double-wrapping would add no signal",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        },
+        {
+          "condition": "the wrapper enforces policy rather than adapting types. Use Guardrail Decorator",
+          "verdict": "does-not-hold",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        },
+        {
+          "condition": "the call is fully internal and no model output crosses the boundary.",
+          "verdict": "holds",
+          "evidence": "artifact/workflow.md:3-16: No model-produced tool arguments cross a boundary; the function is called internally."
+        }
+      ],
+      "decision": "reject",
+      "reason": "No model-produced tool arguments cross a boundary; the function is called internally."
+    }
+  ]
+}

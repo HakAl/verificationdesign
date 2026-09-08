@@ -1,0 +1,5 @@
+interface:
+  display_name: "Verification design"
+  short_description: "Plan verification for work being built"
+policy:
+  allow_implicit_invocation: false

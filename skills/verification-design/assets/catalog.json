@@ -1,0 +1,797 @@
+{
+  "cards": [
+    {
+      "category": "context-and-state",
+      "determinism_move": "Constitution constrains `criteria_drift` (the standard changes between runs without anyone noticing), `judge_subjectivity` (the standard becomes whatever the judge says it is), and `self_review_bias` (the generator rationalizes its own work because verifier criteria are not independent). By externalizing criteria as data, the system has a fixed, versioned answer to \"what is being checked,\" independent of which agent or model is running.",
+      "do_not_use_when": [
+        "the workflow is exploratory and no criteria are known yet",
+        "a single human is manually reviewing one-off output",
+        "the criteria are intentionally subjective and cannot yet be operationalized."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/context-and-state/constitution/",
+      "id": "context-and-state/constitution",
+      "intent": "Represent the system’s verification criteria as explicit, versioned, machine-readable data, rather than as scattered prompt prose.",
+      "markdown_url": "https://verificationdesign.com/patterns/context-and-state/constitution.md",
+      "observable_signal": [
+        "criterion id and constitution version",
+        "expected value or condition",
+        "observed value extracted from evidence",
+        "check method (exec, extract_compare, delta, llm_judge, human_review)",
+        "severity (blocker, major, minor)",
+        "verdict (pass, fail, skipped)",
+        "evidence source reference"
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/comparator",
+        "verification/delta",
+        "verification/blind-oracle",
+        "verification/executable-analog",
+        "orchestration/escalation-chain",
+        "context-and-state/causal-tag",
+        "verification/admissibility-gate"
+      ],
+      "source_sha256": "a4bef9d323334867233f1ff38e37fed96c25d94beb9fe4640ef937267090ff4b",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/constitution.md",
+      "title": "Constitution",
+      "use_when": [
+        "multiple agents or tools evaluate the same artifact",
+        "verification reports need to be auditable",
+        "criteria drift is causing inconsistent judgments",
+        "prompts contain repeated pass/fail language",
+        "failures must be compared across runs",
+        "human reviewers need to know what the system actually checked."
+      ]
+    },
+    {
+      "category": "context-and-state",
+      "determinism_move": "Guardrail Decorator constrains `self_review_bias` by moving the allow or deny decision out of the producing agent's judgment and into code at the call boundary. The producer no longer approves its own action; policy is enforced where the call crosses.",
+      "do_not_use_when": [
+        "the policy is genuinely subjective and a Judge Harness is the right verifier",
+        "the framework's call boundaries cannot be wrapped",
+        "a one-off conditional in the call site is clearer than registering a decorator",
+        "shape normalization is the actual need, which belongs on Tool Adapter."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/context-and-state/guardrail-decorator/",
+      "id": "context-and-state/guardrail-decorator",
+      "intent": "Wrap a model call, tool call, or other model-output boundary in a policy decorator that can deny, replace, sanitize, or convert errors, so policy lives in code at the boundary the model crosses instead of in prompt prose the model is asked to obey.",
+      "markdown_url": "https://verificationdesign.com/patterns/context-and-state/guardrail-decorator.md",
+      "observable_signal": [
+        "call site, such as model identity, tool name, or retriever name",
+        "registered policies in precedence order",
+        "policies checked before the decision",
+        "hook fired (before, after, on_error, or none)",
+        "policy that fired, or none",
+        "decision (pass, deny, replace, sanitize, recover)",
+        "args",
+        "original_response, or not_invoked if a before-hook denied",
+        "override_response, or none for pass-through."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "context-and-state/constitution",
+        "orchestration/tool-adapter",
+        "context-and-state/causal-tag",
+        "context-and-state/trajectory-cursor",
+        "verification/admissibility-gate"
+      ],
+      "source_sha256": "d785a08b3bc82ea08ee16db6fa78bc784ff6359e290e89d25e1ee2848a81d4a9",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/guardrail-decorator.md",
+      "title": "Guardrail Decorator",
+      "use_when": [
+        "the framework supports lifecycle hooks at model, tool, retriever, or output boundaries",
+        "policy enforcement gates side effects such as file writes, network calls, deletions, charges, sends, or deploys",
+        "policy needs to survive prompt rewrites, persona tests, and context compaction",
+        "audit requires a decision log per call",
+        "the policy can be expressed as a deterministic decision function rather than a subjective judgment."
+      ]
+    },
+    {
+      "category": "context-and-state",
+      "determinism_move": "Causal Tag constrains `ambient_state` by stamping every event with a queryable identity. The verifier filters the agent's contributions out of shared logs, traces, and message buses instead of accepting any matching event.",
+      "do_not_use_when": [
+        "the event surface is fully private to the test or run",
+        "State Baseline plus Delta gives equivalent attribution more cheaply",
+        "the boundary cannot carry any metadata and cannot be changed",
+        "the side effect is low stakes and misattribution cost is negligible."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/context-and-state/causal-tag/",
+      "id": "context-and-state/causal-tag",
+      "intent": "Stamp emitted events with stable joinable identifiers and parent links, then join destination observations to recorded actions; causal attribution depends on trustworthy tag generation and propagation.",
+      "markdown_url": "https://verificationdesign.com/patterns/context-and-state/causal-tag.md",
+      "observable_signal": [
+        "run or invocation ID",
+        "parent run or event ID, null only for roots",
+        "propagation surfaces checked, such as trace store, log payload, message attribute, API header",
+        "tag presence per surface",
+        "tree consistency result",
+        "orphan-event count, parent-cycle count, and destination-tag-miss count",
+        "ID generation policy (caller_supplied, framework_assigned, uuid_on_missing)."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/delta",
+        "context-and-state/state-baseline",
+        "context-and-state/trajectory-cursor",
+        "context-and-state/guardrail-decorator",
+        "verification/executable-analog"
+      ],
+      "source_sha256": "7440289e0c71b23ae9d25f5641ba0b2d7063c48f55aa5fa28ba48f21e99bb010",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/causal-tag.md",
+      "title": "Causal Tag",
+      "use_when": [
+        "the agent emits events into shared logs, traces, message buses, APIs, or side-effect targets",
+        "multiple agents, runs, or producers share the same event surface",
+        "async timing, batching, or reordering makes temporal proximity unreliable",
+        "verification must attribute an observed effect to a specific action",
+        "a framework tracing layer exists but is not yet engaged."
+      ]
+    },
+    {
+      "category": "context-and-state",
+      "determinism_move": "Trajectory Cursor constrains `tool_boundary_ambiguity` by requiring every observable boundary to produce a structured entry. The next turn reads the explicit trajectory record instead of reconstructing proposals, denials, executions, and results from chat memory.",
+      "do_not_use_when": [
+        "the workflow is a single-shot model call with no loop",
+        "the framework already persists a structured trajectory and another cursor would duplicate state",
+        "the process is a deterministic transformation pipeline with no agent decisions",
+        "the only verification question is final-state causality, where State Baseline or Delta is enough."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/context-and-state/trajectory-cursor/",
+      "id": "context-and-state/trajectory-cursor",
+      "intent": "Maintain an explicit, structured record of where the agent is in its multi-step process and what happened at each boundary, so the verifier and the next turn can read the trajectory instead of inferring it from chat history or model recall.",
+      "markdown_url": "https://verificationdesign.com/patterns/context-and-state/trajectory-cursor.md",
+      "observable_signal": [
+        "cursor: the last cursor position",
+        "last_entry: the entry that advanced the cursor most recently",
+        "path: the recorded path for the task",
+        "repeat_loop_count: repeated adjacent entries in the recorded path",
+        "missing_required_actions: expected actions absent from the recorded path",
+        "unrecorded_boundaries: expected boundaries with no execution entry."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "context-and-state/state-baseline",
+        "verification/delta",
+        "context-and-state/causal-tag",
+        "verification/executable-analog",
+        "context-and-state/constitution"
+      ],
+      "source_sha256": "df57518b4ebd671b8261a1c2183589b7bf513ec6eb2825488a22b328ca99ee4a",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/trajectory-cursor.md",
+      "title": "Trajectory Cursor",
+      "use_when": [
+        "an agent runs more than two tool calls per task",
+        "permission, retry, fallback, or denial paths exist outside the main action flow",
+        "verification needs to prove which steps executed, not which the agent narrated",
+        "a loop can stall, repeat, or skip required actions",
+        "pause, replay, or human-in-the-loop resume matters."
+      ]
+    },
+    {
+      "category": "context-and-state",
+      "determinism_move": "State Baseline constrains `ambient_state` by recording the state the agent did not create. Restoring the baseline after the action closes the same source of error: one run's residue should not become the next run's setup.",
+      "do_not_use_when": [
+        "the environment is fully ephemeral and recreated for each run",
+        "the state surface is too large and the assertion is low stakes",
+        "the verified property is purely internal to a deterministic function call",
+        "a Causal Tag can identify the agent's own artifacts more directly",
+        "a pre-state read would itself change the system under test."
+      ],
+      "evidence_count": 4,
+      "html_url": "https://verificationdesign.com/patterns/context-and-state/state-baseline/",
+      "id": "context-and-state/state-baseline",
+      "intent": "Capture the relevant environment or process state before an action under verification, so the verifier can establish that observed state did not already exist before the action; causal attribution requires isolation or a Causal Tag.",
+      "markdown_url": "https://verificationdesign.com/patterns/context-and-state/state-baseline.md",
+      "observable_signal": [
+        "check: the verifier or registry check being protected",
+        "snapshot: the snapshot mechanism (in_memory, file_backed, process_env, snapshot_replay, git_preimage)",
+        "covered: the state surfaces covered by the baseline",
+        "pre_state: the pre-action value or snapshot reference",
+        "post_state: the post-action value when comparison is used",
+        "cleanup: the cleanup status (restored, leaked, partial, not_applicable)."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/delta",
+        "context-and-state/causal-tag",
+        "context-and-state/constitution",
+        "context-and-state/trajectory-cursor",
+        "verification/executable-analog"
+      ],
+      "source_sha256": "8874e50a6baf1e4463074c1034e4e53cf4fd90507138299d4bd3852211d487f0",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/state-baseline.md",
+      "title": "State Baseline",
+      "use_when": [
+        "the environment is shared, persistent, or reused across runs",
+        "a pre-existing object could satisfy the post-condition",
+        "concurrent activity can create, delete, or mutate matching state",
+        "the action is destructive and needs an audit trail",
+        "the verifier needs to prove causation, not merely observe a final condition."
+      ]
+    },
+    {
+      "category": "verification",
+      "determinism_move": "Executable Analog constrains `self_review_bias` (the same agent that produced the artifact no longer judges whether it satisfies the check) and `judge_subjectivity` (the verdict comes from a deterministic equality on extracted values, not from a model's interpretation of rendered output). By forcing extract-then-compare instead of interpret-and-decide, the system loses the freedom to rationalize a coincidental pass.",
+      "do_not_use_when": [
+        "the property is genuinely subjective and has no programmatic surface (tone, readability, design taste)",
+        "the extractor would be more brittle than the LLM judgment it replaces",
+        "the cost of writing the executable check exceeds the cost of one-off human review",
+        "the claim is exploratory and \"good\" is not yet defined."
+      ],
+      "evidence_count": 2,
+      "html_url": "https://verificationdesign.com/patterns/verification/executable-analog/",
+      "id": "verification/executable-analog",
+      "intent": "Translate a subjective, language-based verification step into a deterministic, programmatic execution step that yields a binary pass/fail signal independent of the agent's judgment.",
+      "markdown_url": "https://verificationdesign.com/patterns/verification/executable-analog.md",
+      "observable_signal": [
+        "check_id: the named check being run",
+        "expected: the value the executable analog is checking against",
+        "observed: the raw value returned by the extractor, before judgment",
+        "passed: the strict comparison result",
+        "error: the exception text when extraction fails, otherwise None."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/comparator",
+        "context-and-state/constitution",
+        "verification/blind-oracle",
+        "verification/judge-harness",
+        "verification/admissibility-gate"
+      ],
+      "source_sha256": "f4afe81927d488588e2eb599b78ef47d6585be20f1112630adb0a1fbbaf5fbdd",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/executable-analog.md",
+      "title": "Executable Analog",
+      "use_when": [
+        "the claim being verified can be expressed as a deterministic check",
+        "the output has structure (DOM, JSON, exit code, log line) that can be queried",
+        "you can write a test rather than just describe one",
+        "the same check will run repeatedly (regression, CI, multi-agent loops)",
+        "the verification trail needs to be auditable."
+      ]
+    },
+    {
+      "category": "verification",
+      "determinism_move": "Blind Oracle constrains `context_contamination` by separating the derivation channel from the production channel. Expected comes from spec, reference, or re-derivation. Observed comes from the draft. The two never share an input path.",
+      "do_not_use_when": [
+        "expected cannot be derived without reading the draft",
+        "Executable Analog can specialize the pattern with compilation, execution, or runtime traces",
+        "no expected exists and the right pattern is Admissibility Gate or a calibrated Judge Harness",
+        "the artifact and the spec are the same object and derivation must reference the artifact."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/verification/blind-oracle/",
+      "id": "verification/blind-oracle",
+      "intent": "Derive expected evidence from the spec, the question, or independent re-execution without conditioning that derivation on the agent's draft, reasoning trace, or shortcut history.",
+      "markdown_url": "https://verificationdesign.com/patterns/verification/blind-oracle.md",
+      "observable_signal": [
+        "question or spec input",
+        "expected value",
+        "derivation source (spec, reference, blind_rederivation)",
+        "observed value",
+        "extraction method (programmatic, model_mediated)",
+        "comparator name",
+        "verdict",
+        "draft-in-derivation-context boolean."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/comparator",
+        "verification/admissibility-gate",
+        "orchestration/cross-family",
+        "verification/executable-analog",
+        "verification/judge-harness"
+      ],
+      "source_sha256": "a721802a49b71b78f98d41eec5a01950b748778b9631033ae94a31b688b706da",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/blind-oracle.md",
+      "title": "Blind Oracle",
+      "use_when": [
+        "the property under check has a derivable expected value, such as math, parses, structural counts, or executable checks",
+        "false positives from draft-anchored judgment are a known failure mode",
+        "the spec or reference can be processed independently of the draft",
+        "generation and verification share a context window",
+        "the verifier is LLM-based and could otherwise be conditioned on the draft."
+      ]
+    },
+    {
+      "category": "verification",
+      "determinism_move": "Comparator constrains `judge_subjectivity` by making the verdict a deterministic function of expected value, observed value, operator, threshold, and normalization. It constrains `criteria_drift` because a named operator is stable across runs in a way that a prompt-based judge's interpretation is not.",
+      "do_not_use_when": [
+        "the answer is genuinely open-ended and no reference exists",
+        "semantic equivalence is the actual task and a tight comparator would reject acceptable answers",
+        "designing a comparator costs more than a one-off human review",
+        "the comparison needs a calibrated model judge. Use Judge Harness instead of an inline fused judgment."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/verification/comparator/",
+      "id": "verification/comparator",
+      "intent": "Express verification comparison as a named operator from a finite family, so the verdict is a deterministic function of (expected, observed, operator, threshold, normalization) rather than a model's interpretation of \"does this look right?\"",
+      "markdown_url": "https://verificationdesign.com/patterns/verification/comparator.md",
+      "observable_signal": [
+        "operator name",
+        "expected value or reference",
+        "observed value extracted before comparison",
+        "normalization steps applied before comparison",
+        "notes for recorded parse or pattern failures",
+        "score and threshold",
+        "pass/fail verdict."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/executable-analog",
+        "verification/blind-oracle",
+        "verification/judge-harness",
+        "context-and-state/constitution",
+        "verification/delta"
+      ],
+      "source_sha256": "683ff56ec046b9eb5e69c710c3672d1584d0b4180ad51b793511e4386caa3ada",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/comparator.md",
+      "title": "Comparator",
+      "use_when": [
+        "the check has a known expected value, pattern, reference object, or expected event sequence",
+        "the observed value can be extracted separately from the comparison",
+        "a named operator covers the comparison or can be defined cheaply",
+        "the report must be auditable without rerunning a model",
+        "the same comparison will run repeatedly in CI, regression tests, or agent loops."
+      ]
+    },
+    {
+      "category": "verification",
+      "determinism_move": "Delta constrains `ambient_state` by turning an absolute assertion into a relative assertion scoped to the current run. The baseline and post-state expose whether the matching object was already present before the agent acted. The determinism move is scoping the assertion to a captured baseline, so a pass means the measured state changed by the expected amount during this run's verification window. Full causal attribution under concurrent activity requires scoped metrics, exclusive access, or pairing with **Causal Tag**.",
+      "do_not_use_when": [
+        "the environment is fully ephemeral (fresh container per run, mocked DB)",
+        "the metric does not exist pre-action and only the absolute post-state is meaningful",
+        "you cannot capture a baseline before the agent acts (e.g., the agent is invoked black-box)",
+        "the action is destructive or non-replayable and a pre-state read would alter the outcome."
+      ],
+      "evidence_count": 3,
+      "html_url": "https://verificationdesign.com/patterns/verification/delta/",
+      "id": "verification/delta",
+      "intent": "Check whether the observed change in environment state satisfies an action's expected postcondition; attribution to that action requires isolation or a propagated causal tag.",
+      "markdown_url": "https://verificationdesign.com/patterns/verification/delta.md",
+      "observable_signal": [
+        "the baseline value captured before the agent acted",
+        "the post-action value captured after the agent acted",
+        "the computed delta",
+        "the expected delta",
+        "the named metric used for both captures."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "context-and-state/state-baseline",
+        "context-and-state/causal-tag",
+        "verification/comparator",
+        "verification/executable-analog",
+        "orchestration/backpressure"
+      ],
+      "source_sha256": "9b134f0ab04dd3278ffcf7419efc7d369e9ded1325535cd4b521b0511ea3166a",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/delta.md",
+      "title": "Delta",
+      "use_when": [
+        "the environment is shared, persistent, or carries non-trivial pre-existing state",
+        "the metric being measured exists in the environment before the agent acts",
+        "concurrent activity is possible and the metric can be scoped, locked, or paired with Causal Tag",
+        "the assertion needs to prove the state changed during the agent's verification window, with causal attribution handled by scoping, exclusive access, or Causal Tag when concurrency is present."
+      ]
+    },
+    {
+      "category": "verification",
+      "determinism_move": "Judge Harness constrains `sampling_variance` by replacing one judge sample with an aggregated distribution. The verdict is no longer whichever sample happened to arrive first.",
+      "do_not_use_when": [
+        "verification is fully executable, so an Executable Analog or Comparator can decide it without an LLM",
+        "the verdict is low leverage and a single-sample judge call is proportionate",
+        "no calibration set can be obtained and the harness would aggregate without an anchor",
+        "the budget for repetitions is unavailable and the alternative is no judge at all."
+      ],
+      "evidence_count": 6,
+      "html_url": "https://verificationdesign.com/patterns/verification/judge-harness/",
+      "id": "verification/judge-harness",
+      "intent": "Wrap an LLM judge in a structural harness of perturbation, repetition, calibration, and reporting so that one judge verdict becomes a measured signal with visible consistency and bias controls.",
+      "markdown_url": "https://verificationdesign.com/patterns/verification/judge-harness.md",
+      "observable_signal": [
+        "judge model identity",
+        "perturbations applied, such as paraphrase, format_change, name_swap, position_swap for pairwise judges, or none",
+        "repetitions per perturbation",
+        "aggregation rule, such as majority, supermajority, or abstain_on_disagreement",
+        "verdict",
+        "sample distribution",
+        "consistency rate",
+        "calibration source",
+        "calibrated precision and recall when calibration source is not none."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/blind-oracle",
+        "orchestration/cross-family",
+        "verification/admissibility-gate",
+        "context-and-state/constitution",
+        "verification/comparator"
+      ],
+      "source_sha256": "b1cf2d53a402f85f8fc1c983dbc72ae453ee6ea931a18be3bbaf8a5bde4ced16",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/judge-harness.md",
+      "title": "Judge Harness",
+      "use_when": [
+        "the verification path uses an LLM-based judge",
+        "the verdict is high leverage, such as a gate for promotion, training, deployment, or automation",
+        "false positives or false negatives are costly enough to justify multi-sample budget",
+        "human labels exist or can be collected for a calibration set",
+        "the judge family has documented bias modes that can be perturbed against."
+      ]
+    },
+    {
+      "category": "verification",
+      "determinism_move": "When the producer or a same-context verifier grades its own work, Admissibility Gate constrains `self_review_bias` by inverting the default from accept-if-plausible to reject-unless-supported. Missing evidence becomes a `no`, not an invitation to rationalize.",
+      "do_not_use_when": [
+        "the task is genuinely iterative and evaluator-optimizer is the desired loop",
+        "the output is exploratory and no one has defined what \"wrong\" means yet",
+        "strict admissibility would reject too many acceptable answers",
+        "a named Comparator or Executable Analog can decide the check directly",
+        "the right escalation is a calibrated Judge Harness around a subjective property."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/verification/admissibility-gate/",
+      "id": "verification/admissibility-gate",
+      "intent": "Replace tone-level skepticism instructions with admissibility rules that define what counts as proof, name common shortcut paths to reject, and invert the verifier's default from \"accept if plausible\" to \"fail unless backed by trusted evidence.\"",
+      "markdown_url": "https://verificationdesign.com/patterns/verification/admissibility-gate.md",
+      "observable_signal": [
+        "admissible-evidence types for each property",
+        "forbidden-evidence types for each property",
+        "shortcut-rejection list",
+        "evidence collected per property",
+        "excluded evidence and its exclusion reason per property",
+        "rationale per property",
+        "default verdict when evidence is missing",
+        "aggregate result with missing-evidence count."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "orchestration/adversary",
+        "verification/blind-oracle",
+        "verification/comparator",
+        "context-and-state/constitution",
+        "orchestration/cross-family",
+        "verification/judge-harness"
+      ],
+      "source_sha256": "47fea1b72aa41e475ab4377a07691d83f082c274565fa96cc3340dfb977f78c2",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/admissibility-gate.md",
+      "title": "Admissibility Gate",
+      "use_when": [
+        "the verifier checks work produced by an LLM",
+        "false approvals are more costly than false rejections",
+        "the task has known shortcut paths or lookalike evidence",
+        "generation and verification share a model family or context",
+        "the rubric will be reused across many runs."
+      ]
+    },
+    {
+      "category": "orchestration",
+      "determinism_move": "Cross-Family constrains `same_family_bias` by requiring the verifier's family to be a configured value distinct from the generator's, recorded in the verdict so the boundary is auditable.",
+      "do_not_use_when": [
+        "verification is fully executable, so an Executable Analog or Comparator can decide it without an LLM judge",
+        "only one provider is reachable and provider diversity cannot be added",
+        "the verification is low leverage and misattribution cost is negligible",
+        "the boundary cannot carry verifier identity metadata."
+      ],
+      "evidence_count": 6,
+      "html_url": "https://verificationdesign.com/patterns/orchestration/cross-family/",
+      "id": "orchestration/cross-family",
+      "intent": "Run high-leverage generation and high-leverage assessment on deliberately different model families, and record both identities, so exposure to shared training-data biases and shared latent priors is reduced rather than assumed away, and any residual correlated error is attributable to named models.",
+      "markdown_url": "https://verificationdesign.com/patterns/orchestration/cross-family.md",
+      "observable_signal": [
+        "generator model and family",
+        "verifier model and family",
+        "family equality boolean (generator_family == verifier_family)",
+        "verdict",
+        "verifier configuration source (explicit_config, framework_default, module_singleton)",
+        "Judge Harness fields if wrapped, such as consistency, perturbation, and calibration, or harness: none if not."
+      ],
+      "pattern_example": "none",
+      "related": [
+        "verification/judge-harness",
+        "context-and-state/constitution",
+        "verification/admissibility-gate",
+        "verification/blind-oracle",
+        "orchestration/adversary"
+      ],
+      "source_sha256": "edcad6fcaa9334fb4cd9c78741d9768e3f12506430d63554015acf2085929442",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/cross-family.md",
+      "title": "Cross-Family",
+      "use_when": [
+        "an LLM-based judge or evaluator is on the verification path",
+        "the same provider serves both generation and verification by default",
+        "the verification result gates promotion, training, deployment, or downstream automation",
+        "optimization-time advice steers a model being shaped",
+        "audit context requires verifier identity to be recorded."
+      ]
+    },
+    {
+      "category": "orchestration",
+      "determinism_move": "Adversary constrains `self_review_bias` by making the proposer unable to satisfy the adversarial step alone. The critic identity is external to the proposal, and the assertion rejects `critic_id == proposer_id`.",
+      "do_not_use_when": [
+        "the task is trivial and a second role would add process noise",
+        "the critic would be the same model, same prompt context, and same family, with no recorded independence",
+        "an Executable Analog or Comparator can decide the property without an LLM critic",
+        "the desired structure is multi-round disagreement among several roles. Use Debate for that."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/orchestration/adversary/",
+      "id": "orchestration/adversary",
+      "intent": "Assign a structurally separate role whose only job is to find failures in another role's output, and require that role to emit a negative channel the orchestrator can inspect.",
+      "markdown_url": "https://verificationdesign.com/patterns/orchestration/adversary.md",
+      "observable_signal": [
+        "proposal id",
+        "proposer id",
+        "critic id",
+        "critic distinct from proposer boolean",
+        "negative-channel present boolean",
+        "weakness count",
+        "critique score, on a 0-100 concern scale where higher means more severe",
+        "verdict."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "verification/admissibility-gate",
+        "orchestration/cross-family",
+        "orchestration/debate",
+        "orchestration/escalation-chain",
+        "orchestration/backpressure"
+      ],
+      "source_sha256": "b26117aaec170de9c999691a8fdb8ff98561924c9a82ceb19c2484b089fb4957",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/adversary.md",
+      "title": "Adversary",
+      "use_when": [
+        "a single proposer's blind spots are costly",
+        "the workflow can afford a second role",
+        "the system needs an explicit failure-search step before release",
+        "the critique should create a routable artifact, not only prose",
+        "later Backpressure, Escalation Chain, or Debate steps need a negative signal."
+      ]
+    },
+    {
+      "category": "orchestration",
+      "determinism_move": "Debate constrains `criteria_drift` by putting the decision rule in code. Consensus means a named threshold over current votes by distinct debaters, a vote tally, or exhausted round budget, not the model's changing sense that the group now agrees.",
+      "do_not_use_when": [
+        "a single critic is enough. Use Adversary",
+        "an Executable Analog or Comparator can decide the property directly",
+        "token, latency, or provider cost cannot support multiple turns",
+        "all debaters are the same model, same prompt, and same family, with no recorded diversity."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/orchestration/debate/",
+      "id": "orchestration/debate",
+      "intent": "Run bounded disagreement among multiple roles before a decision, with turn order, round count, phase, and consensus threshold held in orchestration state instead of model discretion.",
+      "markdown_url": "https://verificationdesign.com/patterns/orchestration/debate.md",
+      "observable_signal": [
+        "debater ids",
+        "rounds run",
+        "maximum rounds",
+        "phase sequence",
+        "consensus threshold",
+        "vote tally",
+        "decision",
+        "decision rule",
+        "speaker schedule."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "orchestration/adversary",
+        "orchestration/cross-family",
+        "orchestration/escalation-chain",
+        "orchestration/backpressure",
+        "verification/admissibility-gate"
+      ],
+      "source_sha256": "da74a53e030ae1a40dd658f157df4b615e95318178debf2673d0321109d39bf8",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/debate.md",
+      "title": "Debate",
+      "use_when": [
+        "a high-stakes decision benefits from several perspectives",
+        "a single Adversary pass is too narrow",
+        "the system can afford multiple roles and bounded rounds",
+        "the decision needs an auditable vote, threshold, or turn record",
+        "unresolved disagreement should route to Escalation Chain or Backpressure."
+      ]
+    },
+    {
+      "category": "orchestration",
+      "determinism_move": "Escalation Chain constrains `tool_boundary_ambiguity` by making transfer of control happen at a typed boundary. The handoff target is validated against participants before the next handler runs, rather than being held in model memory.",
+      "do_not_use_when": [
+        "a flat single-handler design is enough",
+        "an Executable Analog or Comparator can decide the property without routing",
+        "the proposed target is the same model, same prompt, and same family",
+        "there is no owner capable of handling the escalated work",
+        "the chain cannot enforce a maximum depth."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/orchestration/escalation-chain/",
+      "id": "orchestration/escalation-chain",
+      "intent": "Route work to a higher-authority or different-capability handler through a typed, validated handoff, so the next owner is code-level state instead of a model's memory of who to call.",
+      "markdown_url": "https://verificationdesign.com/patterns/orchestration/escalation-chain.md",
+      "observable_signal": [
+        "source handler",
+        "target handler",
+        "escalation reason",
+        "escalation depth",
+        "maximum depth",
+        "checks performed",
+        "process mode, such as typed_handoff or manager_process",
+        "manager-present boolean for manager-process reports",
+        "path so far."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "orchestration/backpressure",
+        "orchestration/cross-family",
+        "orchestration/debate",
+        "orchestration/adversary",
+        "context-and-state/causal-tag"
+      ],
+      "source_sha256": "da151da11c1ce46841ba8a704194eaf479acea5bd53800e4fe99a08b5326efb2",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/escalation-chain.md",
+      "title": "Escalation Chain",
+      "use_when": [
+        "failures or low-confidence decisions should route to a more capable handler",
+        "the system has tiers, specialists, managers, or humans",
+        "the next handler must be auditable",
+        "unresolved Adversary or Debate findings need a stronger route",
+        "same-family retry would be insufficient evidence of independence."
+      ]
+    },
+    {
+      "category": "orchestration",
+      "determinism_move": "Backpressure constrains `criteria_drift` by pinning the pass criterion and retry budget in code. A rerun is not driven by the model's sense that the output might be good enough now; it is driven by a recorded verifier result and a counted budget.",
+      "do_not_use_when": [
+        "the failure is non-recoverable and should escalate immediately",
+        "the upstream step cannot consume feedback",
+        "an Executable Analog passes deterministically without revision",
+        "retry cost is unacceptable",
+        "the verifier cannot state what failed."
+      ],
+      "evidence_count": 5,
+      "html_url": "https://verificationdesign.com/patterns/orchestration/backpressure/",
+      "id": "orchestration/backpressure",
+      "intent": "When a downstream check fails, route the failure back upstream as structured rerun context within a bounded retry budget, instead of swallowing the failure or retrying blindly.",
+      "markdown_url": "https://verificationdesign.com/patterns/orchestration/backpressure.md",
+      "observable_signal": [
+        "attempts",
+        "maximum retries",
+        "rerun_context_fed_back boolean",
+        "last failure reason",
+        "per-attempt verdicts",
+        "outcome, such as passed or exhausted",
+        "artifact or escalation target."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "orchestration/escalation-chain",
+        "orchestration/adversary",
+        "verification/admissibility-gate",
+        "verification/comparator",
+        "context-and-state/causal-tag"
+      ],
+      "source_sha256": "914b71073d4460d32a00bb20235ab0ea764c09dcc892371fcf41bebdc4554a1b",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/backpressure.md",
+      "title": "Backpressure",
+      "use_when": [
+        "a downstream verifier can fail recoverably",
+        "the upstream step can consume corrective feedback",
+        "bounded automatic revision is cheaper than immediate escalation",
+        "a recorded retry trail is useful for audit or debugging",
+        "an Adversary, Comparator, or guardrail can produce a concrete failure reason."
+      ]
+    },
+    {
+      "category": "orchestration",
+      "determinism_move": "Tool Adapter constrains `tool_boundary_ambiguity` by making the model-to-tool boundary a typed, validated schema instead of an implicit string contract. Malformed model output fails at the door instead of inside the tool.",
+      "do_not_use_when": [
+        "there is a single trivial tool with no arguments",
+        "the framework already provides a typed tool boundary and double-wrapping would add no signal",
+        "the wrapper enforces policy rather than adapting types. Use Guardrail Decorator",
+        "the call is fully internal and no model output crosses the boundary."
+      ],
+      "evidence_count": 4,
+      "html_url": "https://verificationdesign.com/patterns/orchestration/tool-adapter/",
+      "id": "orchestration/tool-adapter",
+      "intent": "Normalize model-emitted tool calls at a typed boundary: derive or fetch a schema, validate arguments before invocation, call the tool with typed arguments, and return a typed observation.",
+      "markdown_url": "https://verificationdesign.com/patterns/orchestration/tool-adapter.md",
+      "observable_signal": [
+        "tool name",
+        "schema source, such as typed_signature or protocol_fetch",
+        "schema-present boolean",
+        "args-validated boolean",
+        "validation error, or none",
+        "call id, deterministic in tests when an id factory is supplied",
+        "observation type",
+        "return value or error surface."
+      ],
+      "pattern_example": "executable",
+      "related": [
+        "context-and-state/guardrail-decorator",
+        "verification/executable-analog",
+        "verification/comparator",
+        "context-and-state/causal-tag",
+        "context-and-state/trajectory-cursor"
+      ],
+      "source_sha256": "51c4feb102c0330f1eafae5952b53d41e43397c4037b2906e0d33ff0d332ad97",
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/tool-adapter.md",
+      "title": "Tool Adapter",
+      "use_when": [
+        "a model calls tools with structured arguments",
+        "tools have typed functions or external protocol schemas",
+        "malformed arguments could cause side effects",
+        "audit requires a single owner for tool format",
+        "observations need to be consumed by later verification or trajectory steps."
+      ]
+    }
+  ],
+  "content_sha256": "dc402ca4a48816c7ca10aacb77c3e98fc0fca8537dffc16248aaa80903288ba4",
+  "failures": [
+    {
+      "cards": [
+        "verification/executable-analog",
+        "verification/comparator",
+        "context-and-state/constitution"
+      ],
+      "failure": "The agent says done, but the work is not actually done.",
+      "shape": "The workflow has no external signal for completion."
+    },
+    {
+      "cards": [
+        "verification/blind-oracle",
+        "orchestration/cross-family",
+        "orchestration/adversary",
+        "verification/admissibility-gate"
+      ],
+      "failure": "The agent reviews itself and misses obvious problems.",
+      "shape": "The verifier is too close to the generator."
+    },
+    {
+      "cards": [
+        "context-and-state/state-baseline",
+        "verification/judge-harness",
+        "orchestration/backpressure"
+      ],
+      "failure": "The same prompt produces different outcomes across runs.",
+      "shape": "Variance is leaking through sampling, state, timing, or judge behavior."
+    },
+    {
+      "cards": [
+        "verification/delta",
+        "context-and-state/causal-tag",
+        "context-and-state/trajectory-cursor"
+      ],
+      "failure": "The check passes because the environment already looked right.",
+      "shape": "The verifier observes a true fact, but not causality."
+    },
+    {
+      "cards": [
+        "orchestration/escalation-chain",
+        "orchestration/debate",
+        "orchestration/backpressure"
+      ],
+      "failure": "Agents disagree, loop, or escalate randomly.",
+      "shape": "The system has no explicit routing policy for uncertainty."
+    },
+    {
+      "cards": [
+        "context-and-state/guardrail-decorator",
+        "orchestration/tool-adapter",
+        "context-and-state/constitution"
+      ],
+      "failure": "Tool calls are messy, unsafe, or hard to verify.",
+      "shape": "The boundary between model intent, tool input, and policy is ambiguous."
+    }
+  ],
+  "generated": true,
+  "license": "CC BY 4.0",
+  "principles": {
+    "html_url": "https://verificationdesign.com/principles/",
+    "markdown_url": "https://verificationdesign.com/principles.md",
+    "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md"
+  },
+  "revision": "e632a86b2ca8fbb7f83b3130ba083784c7817667",
+  "schema_version": 1,
+  "site": "https://verificationdesign.com"
+}
