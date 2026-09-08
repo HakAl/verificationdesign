@@ -1,204 +1,83 @@
 # Findings record
 
-Write one JSON object with `corpus_revision` equal to the packaged revision,
-non-empty `artifact`, a one-line non-empty `scope`, and a `checks` list.
-For every bullet in principles-checklist.md, create exactly one entry with the whole
-bullet text (including the citation, excluding `- `) as `question`, and its heading's
-integer `principle` (1 to 9). Checklist order is preferred; the renderer restores it.
+A JSON object has `corpus_revision` equal to the packaged revision, non-empty `artifact`,
+one-line non-empty `scope`, `assumptions` (may be empty), and `checks`.
+Every checklist bullet appears exactly once as its whole text (including citation,
+excluding `- `) in `question`, with its integer `principle` (1 to 9).
 
-Every entry has `status`, non-empty string `evidence`, and `severity`:
+Every entry has non-empty string `evidence`, `status`, and `severity`:
 
-- `sound`: evidence of the checked behavior; severity null.
-- `defect`: artifact evidence; failure equal to a catalog failure string or `unmapped`;
-  severity high, medium or low. `unmapped` requires non-empty `failure_note`.
-- `not-checked`: evidence is the reason no check was performed; severity null.
+- `sound`: checked behavior with evidence; severity null.
+- `defect`: in-scope artifact evidence, failure equal to a mapped failure or `unmapped`,
+  severity high, medium or low. Unmapped requires non-empty `failure_note`.
+- `not-applicable`: the question cannot apply to this artifact and scope, for example
+  no model review or no second reviewer exists. Evidence is the reason. Severity null,
+  no failure and no routing.
+- `not-checked`: evidence explains why no check was performed; severity null.
 - `insufficient-evidence`: evidence names what is missing and what would settle it;
-  severity null. Include unavailable source URL and reason here when relevant.
+  severity null.
+- `out-of-scope`: `free: true`, principle 1 to 9 or null, original question, evidence
+  describing an observation outside the scope. Severity null, no failure and no routing.
+  This section is for things fresh eyes noticed and the scope excludes. A defect belongs
+  in Defects only if it is in scope. These observations never count as defects or replace
+  checklist coverage.
 
-Non-defect entries may use null `failure` and empty `failure_note`. Additional defects
-outside the checklist use `free: true`, a principle 1 to 9, and an original question.
-A free entry never substitutes for a checklist question. Do not put fix proposals in
-questions, evidence or notes. The six mapped failure strings are routing aids, not an
-exhaustive taxonomy: an unmapped defect is valid.
+Additional in-scope defects use `free: true`, principle 1 to 9 and an original question.
+Free entries never substitute for checklist questions. Non-defects may use null failure
+and empty failure_note; not-applicable and out-of-scope require these absent or empty
+and cannot carry cards or routed fields. No fix proposals anywhere.
 
-Validation rules: `structure`, `coverage`, `status`, `evidence`, `failure`, `severity`.
-Failure output is a JSON list with `card` (null), `check` (index or null), `rule`, `message`.
-The router adds `cards` and `routed` only to defects; it discards previous routing and
-recomputes from the snapshot. The renderer rejects mismatched or missing routing.
+`failure_note` is an optional string on mapped defects, rendered whenever non-empty.
+Use it to say several defects share one cause. The six mapped failures are routing aids,
+not an exhaustive taxonomy. The router computes cards and routed only for defects;
+the renderer rejects incorrect routing.
 
-## Filled example
+Rules: `structure`, `coverage` (including free out-of-scope restrictions), `status`
+(the six statuses above), `evidence`, `failure`, `severity`, `routing`.
+Errors report card (null), check index, rule and message; exit 3.
+Success reports checks, defects, counts per status and defects by severity; exit 0.
+An emitted scaffold fails `status` and `evidence`, never passing as a finished audit.
 
-This complete illustrative record describes a hypothetical self-review workflow.
-It is a schema example, not evidence about the operator's artifact.
+## Shared record fields
 
-```json
-{
-  "corpus_revision": "e632a86b2ca8fbb7f83b3130ba083784c7817667",
-  "artifact": "skills/fixtures/audit-known-defect/artifact",
-  "scope": "Check generator/verifier independence in the inventory summary workflow.",
-  "checks": [
-    {
-      "principle": 1,
-      "question": "What external observation, distinct from the generator saying done, records completion? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#1-external-signals-over-self-review)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 1,
-      "question": "Which expected and observed values are recorded for each completion check? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#1-external-signals-over-self-review)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 2,
-      "question": "Who evaluates the generated output, and what evidence separates that evaluator from the generator? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#2-independence-between-generation-and-verification)",
-      "status": "defect",
-      "evidence": "artifact/workflow.md:3-4 names the same generating agent and context for review; artifact/generate.py:5-10 reports completion from its own text without an independent source.",
-      "failure": "The agent reviews itself and misses obvious problems.",
-      "failure_note": "",
-      "severity": "high"
-    },
-    {
-      "principle": 2,
-      "question": "Which generator context is withheld from the verifier, and where is that boundary recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#2-independence-between-generation-and-verification)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 3,
-      "question": "Which intermediate steps emit observable signals before the final completion decision? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#3-step-level-checkpoints)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 3,
-      "question": "Where are a failed checkpoint and the resulting stop or escalation recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#3-step-level-checkpoints)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 4,
-      "question": "Which checks search for a counterexample to completion, with the observed result recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 4,
-      "question": "What evidence shows that a failing artifact can be rejected by the verification procedure? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 5,
-      "question": "Where are the expected conditions and criterion identifiers specified before evaluation? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#5-explicit-criteria)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 5,
-      "question": "How does the artifact record the criteria version used for each verdict? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#5-explicit-criteria)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 6,
-      "question": "Which claims are checked by executable assertions or comparisons, and where are their results? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#6-executable-verification-is-king)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 6,
-      "question": "Which claims still depend on judgment, and what evidence bounds those claims? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#6-executable-verification-is-king)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 7,
-      "question": "When model review is used, what generator and verifier model families are recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#7-cross-family-beats-self-verification)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 7,
-      "question": "What evidence supports the selected verifier for this artifact and scope? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#7-cross-family-beats-self-verification)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 8,
-      "question": "When independent reviewers disagree, where are their claims and evidence recorded separately? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#8-simulate-debate)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 8,
-      "question": "What explicit rule routes unresolved disagreement or stops further review? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#8-simulate-debate)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 9,
-      "question": "What before-state or isolated baseline lets a check attribute its observation to this run? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#9-isolate-verification-from-ambient-state)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    },
-    {
-      "principle": 9,
-      "question": "Where are run identifiers, state changes and observed deltas recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#9-isolate-verification-from-ambient-state)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
-      "failure": null,
-      "failure_note": "",
-      "severity": null
-    }
-  ]
-}
-```
+- `assumptions` (required, rule `assumptions`): list of objects with non-empty string
+  `topic` and `statement`. Topics are free text. Named topics: `verification-path`
+  identifies which path judgments cover when multiple verification paths exist;
+  `artifact-stage` identifies spec, prototype or running; `scope-expansion` quotes
+  the operator's original words when scope is restated or expanded; `measurement-basis`
+  distinguishes what the agent ran from what it only read.
+- `measurements` (optional, rule `measurements`): list of objects with unique non-empty
+  string `id`, non-empty string `command`, string-to-string object `env` (may be empty),
+  integer `exit_code` (not boolean), string `artifact_revision` (may be empty),
+  `log` (string path or null), and string `note` (may be empty). Cite measurements by id.
+- `artifact_identity` (optional, rule `artifact-identity`): object with `revision`
+  (string or null) and `files`, a list of objects with string `path` and `sha256`. The renderer reports the revision, file count and list.
+- `unavailable_sources` (optional, rule `unavailable-sources`): list of the exact
+  fetch exit-4 objects: `{"unavailable": true, "source_url": "...", "reason": "offline"}`.
+  Paste JSON here before validating, never into rendered output. The renderer places
+  fenced JSON in the uncertainty section. Optional fields may be absent.
+
+Defects are judged against the nine principles, not the artifact's own requirements.
+The absence of a record a principle asks for is a defect; severity carries how much
+it matters here. Applying a design card is a separate applicability judgment.
+
+A measurement the agent ran is evidence of what the artifact does. It is not evidence
+that the artifact records anything. Cite measurements by id and distinguish measured
+behavior from records that the artifact itself preserves.
+
+## Mechanical helpers
+
+Run `scaffold_record.py --artifact TEXT --scope TEXT --output FILE|-` before judging.
+It copies fields and judges nothing. FILE receives the record with a JSON count receipt
+on stdout; `-` emits one JSON envelope containing `record` and `counts`.
+
+Run `check_citations.py record.json --root DIR [--output FILE|-]` after validation.
+It scans evidence, reason, statement, note and instantiation strings for `path:N` or
+`path:N-M` (paths must contain a dot or slash). Relative paths use DIR; absolute paths
+are used as given. Each citation is counted once as found, missing or out-of-bounds.
+The JSON reports counts and non-found citations with their record entry. Exit 0 means
+all found, exit 3 means some were not. This checks existence and bounds only, nothing
+about meaning. It reads line counts, not artifact semantics. A failure requires repair
+or an explanation in assumptions, followed by validation again.
+
+See `skills/fixtures/audit-known-defect/record.json` in the repository for a complete example.

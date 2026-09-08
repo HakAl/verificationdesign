@@ -948,5 +948,25 @@
       "topic": "verification-path",
       "statement": "The executable fixture check and its documented completion signal."
     }
+  ],
+  "measurements": [
+    {
+      "id": "same",
+      "command": "python3 check.py",
+      "env": {},
+      "exit_code": 0,
+      "artifact_revision": "",
+      "log": null,
+      "note": ""
+    },
+    {
+      "id": "same",
+      "command": "python3 check.py",
+      "env": {},
+      "exit_code": 0,
+      "artifact_revision": "",
+      "log": null,
+      "note": ""
+    }
   ]
 }

@@ -6,6 +6,10 @@ import sys
 sys.dont_write_bytecode = True
 from load_catalog import ROOT, SnapshotError, cli_main, emit, load_catalog, parser, read_record
 
+from record_fields import validate_common
+
+STATUSES = ("defect", "sound", "not-applicable", "not-checked", "insufficient-evidence", "out-of-scope")
+
 
 def nonempty(value):
     return isinstance(value, str) and bool(value.strip())
@@ -37,6 +41,7 @@ def validate(record, catalog=None, questions=None):
     if not isinstance(record, dict):
         fail(None, "structure", "record must be an object")
         return errors
+    validate_common(record, fail)
     for key in ("corpus_revision", "artifact", "scope"):
         if not nonempty(record.get(key)):
             fail(None, "structure", key + " must be a non-empty string")
@@ -56,20 +61,24 @@ def validate(record, catalog=None, questions=None):
             fail(i, "structure", "check must be an object")
             continue
         principle, question = check.get("principle"), check.get("question")
-        if type(principle) is not int or principle not in range(1, 10) or not nonempty(question):
+        outside = check.get("status") == "out-of-scope"
+        valid_principle = (type(principle) is int and principle in range(1, 10)) or (outside and principle is None)
+        if not valid_principle or not nonempty(question):
             fail(i, "structure", "principle must be 1 to 9 and question must be non-empty")
             continue
         if "free" in check and type(check["free"]) is not bool:
             fail(i, "structure", "free must be a boolean")
         if check.get("free") is True:
-            if question in known or check.get("status") != "defect":
-                fail(i, "coverage", "free entries must be additional defects with their own question")
+            if question in known or check.get("status") not in ("defect", "out-of-scope"):
+                fail(i, "coverage", "free entries must be additional defects or out-of-scope observations with their own question")
         else:
+            if outside:
+                fail(i, "coverage", "out-of-scope requires free: true and an original question")
             seen.append(question)
             if known.get(question) != principle:
                 fail(i, "coverage", "question must match the checklist and its principle verbatim")
         status = check.get("status")
-        if not isinstance(status, str) or status not in {"sound", "defect", "not-checked", "insufficient-evidence"}:
+        if not isinstance(status, str) or status not in STATUSES:
             fail(i, "status", "unsupported status")
         if not nonempty(check.get("evidence")):
             fail(i, "evidence", "every status requires evidence or a reason stating what is missing")
@@ -81,12 +90,28 @@ def validate(record, catalog=None, questions=None):
                 fail(i, "failure", "unmapped defects require failure_note")
             if check.get("severity") not in ("high", "medium", "low"):
                 fail(i, "severity", "defects require high, medium or low severity")
-        elif "severity" not in check or check["severity"] is not None:
-            fail(i, "severity", "non-defect severity must be null")
+        else:
+            if "severity" not in check or check["severity"] is not None:
+                fail(i, "severity", "non-defect severity must be null")
+            if status in ("not-applicable", "out-of-scope"):
+                if check.get("failure") is not None or check.get("failure_note", ""):
+                    fail(i, "failure", "this status has no failure or failure note")
+                if "cards" in check or "routed" in check:
+                    fail(i, "routing", "this status has no routing")
+        if "failure_note" in check and not isinstance(check["failure_note"], str):
+            fail(i, "failure", "failure_note must be a string")
     for _, question in questions:
         if seen.count(question) != 1:
             fail(None, "coverage", "checklist question must appear exactly once: " + question)
     return errors
+
+
+def counts(record):
+    checks = record["checks"]
+    return {"checks": len(checks), "defects": sum(c["status"] == "defect" for c in checks),
+            "statuses": {s: sum(c["status"] == s for c in checks) for s in STATUSES},
+            "severity": {s: sum(c["status"] == "defect" and c["severity"] == s for c in checks)
+                         for s in ("high", "medium", "low")}}
 
 
 def main():
@@ -99,7 +124,7 @@ def main():
         emit(errors)
         print("findings validation failed", file=sys.stderr)
         return 3
-    emit({"valid": True, "checks": len(record["checks"]), "defects": sum(c["status"] == "defect" for c in record["checks"])})
+    emit(dict(valid=True, **counts(record)))
     return 0
 
 

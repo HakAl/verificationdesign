@@ -1,25 +1,43 @@
 # Verification plan
 
-Artifact: {artifact}
+Artifact: <resolved artifact>
 
-Scope: {scope}
+Scope: <resolved scope>
 
-Corpus revision: `{corpus_revision}`
+Corpus revision: <pin>
 
-Corpus tag: `{corpus_tag}`
+Corpus tag: <tag>
+
+Artifact identity: <optional revision, count and files>
+
+## Assumptions
+
+<rendered record content>
+
+## Measurements
+
+Optional; omit when absent.
+
+## Summary
+
+<rendered record content>
 
 ## Workflow characterization
 
-{workflow_characterization}
+<rendered record content>
 
 ## Patterns applied
 
-{patterns_applied}
+<rendered record content>
 
 ## Patterns rejected
 
-{patterns_rejected}
+<rendered record content>
 
 ## Not verified
 
-{not_verified}
+<rendered record content>
+
+## Sources
+
+<rendered record content>

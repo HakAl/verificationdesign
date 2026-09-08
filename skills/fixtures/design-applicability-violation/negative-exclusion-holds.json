@@ -942,5 +942,11 @@
       "decision": "reject",
       "reason": "No model-produced tool arguments cross a boundary; the function is called internally."
     }
+  ],
+  "assumptions": [
+    {
+      "topic": "verification-path",
+      "statement": "The executable fixture check and its documented completion signal."
+    }
   ]
 }

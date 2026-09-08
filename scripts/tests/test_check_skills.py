@@ -127,7 +127,7 @@ class OutputBoundaryTests(unittest.TestCase):
 
     def test_audit_missing_question_fails_coverage(self):
         record = json.loads((ROOT / "skills/fixtures/audit-known-defect/record.json").read_text())
-        record["checks"].pop()
+        record["checks"].pop(0)
         result = self.call("verification-audit", "validate_findings.py", record)
         self.assertEqual(result.returncode, 3)
         self.assertIn("coverage", {e["rule"] for e in json.loads(result.stdout)})
@@ -143,9 +143,9 @@ class OutputBoundaryTests(unittest.TestCase):
         rendered = self.call("verification-audit", "render_findings.py", routed_record, output=True)
         self.assertEqual(rendered.returncode, 0, rendered.stdout + rendered.stderr)
         text = self.output.read_text()
-        self.assertIn("no routed card", text)
+        self.assertIn("No routed card: outside the six mapped failures; see the failure note above.", text)
         headings = [line for line in text.splitlines() if line.startswith("## ")]
-        self.assertEqual(headings, ["## Defects", "## Checked and sound", "## Not checked", "## Insufficient evidence"])
+        self.assertEqual(headings, ["## Assumptions", "## Summary", "## Defects", "## Checked and sound", "## Not applicable", "## Not checked", "## Insufficient evidence", "## Observed outside scope", "## Sources"])
 
     def test_tampered_routing_cannot_write_findings(self):
         record = json.loads((ROOT / "skills/fixtures/audit-known-defect/record.json").read_text())
@@ -158,6 +158,181 @@ class OutputBoundaryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 3)
         self.assertEqual(json.loads(result.stdout)[0]["rule"], "routing")
         self.assertFalse(self.output.exists())
+
+
+class ReleaseTests(unittest.TestCase):
+    def run_script(self, kind, name, *args):
+        return checker.run([sys.executable, str(ROOT / "skills" / ("verification-" + kind) / "scripts" / name), *map(str, args)])
+
+    def test_python_guard(self):
+        from unittest.mock import patch
+        import io
+        from contextlib import redirect_stderr
+        from load_catalog import require_python
+        with patch.object(sys, "version_info", (3, 9, 6)), redirect_stderr(io.StringIO()) as stderr:
+            with self.assertRaises(SystemExit) as exc:
+                require_python()
+        self.assertEqual(exc.exception.code, 2)
+        self.assertEqual(stderr.getvalue(), "Python 3.9.6 found; Python 3.11 or later required\n")
+        with patch.object(sys, "version_info", (3, 11, 0)):
+            require_python()
+
+    def test_scaffolds_copy_fields_and_fail_validation(self):
+        catalog = json.loads((DESIGN / "assets/catalog.json").read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            for kind, counts, rules in (("design", {"cards": 17, "conditions": 156}, {"assumptions", "structure"}),
+                                        ("audit", {"checks": 18}, {"status", "evidence"})):
+                path = Path(tmp) / (kind + ".json")
+                result = self.run_script(kind, "scaffold_record.py", "--artifact", "test artifact", "--scope", "test scope", "--output", path)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout)["counts"], counts)
+                record = json.loads(path.read_text())
+                self.assertEqual(record["corpus_revision"], catalog["revision"])
+                if kind == "design":
+                    self.assertEqual([c["id"] for c in record["cards"]], [c["id"] for c in catalog["cards"]])
+                    for card, source in zip(record["cards"], catalog["cards"]):
+                        for group in ("use_when", "do_not_use_when"):
+                            self.assertEqual([c["condition"] for c in card[group]], source[group])
+                            self.assertTrue(all(c["verdict"] == c["evidence"] == "" for c in card[group]))
+                else:
+                    lines = (ROOT / "skills/verification-audit/references/principles-checklist.md").read_text().splitlines()
+                    self.assertEqual([c["question"] for c in record["checks"]], [line[2:] for line in lines if line.startswith("- ")])
+                result = self.run_script(kind, "validate_judgments.py" if kind == "design" else "validate_findings.py", path)
+                self.assertEqual(result.returncode, 3)
+                self.assertEqual({e["rule"] for e in json.loads(result.stdout)}, rules)
+                envelope = self.run_script(kind, "scaffold_record.py", "--artifact", "test artifact", "--scope", "test scope", "--output", "-")
+                self.assertEqual(json.loads(envelope.stdout), {"record": record, "counts": counts})
+
+    def test_citation_existence_bounds_and_selected_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "sample.txt").write_text("one\ntwo\nthree")
+            record = {"evidence": "sample.txt:1 sample.txt:2-3 sample.txt:4 missing.txt:1 sample.txt:1",
+                      "assumptions": [{"statement": str(root / "sample.txt") + ":3"}],
+                      "measurements": [{"note": "sample.txt:0 sample.txt:3-2"}],
+                      "reason": "sample.txt:1", "instantiation": "missing/thing:2",
+                      "question": "ignore.txt:1", "command": "ignore.txt:2"}
+            path = root / "record.json"; path.write_text(json.dumps(record))
+            for kind in ("design", "audit"):
+                result = self.run_script(kind, "check_citations.py", path, "--root", root)
+                self.assertEqual(result.returncode, 3, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report["counts"], {"found": 3, "missing": 2, "out-of-bounds": 3})
+                self.assertEqual(len(report["citations"]), 5)
+                self.assertTrue(all(x["entry"].startswith("$.") for x in report["citations"]))
+                path.write_text(json.dumps({"evidence": "sample.txt:1-3"}))
+                good = self.run_script(kind, "check_citations.py", path, "--root", root)
+                self.assertEqual(good.returncode, 0)
+                self.assertEqual(json.loads(good.stdout)["counts"], {"found": 1, "missing": 0, "out-of-bounds": 0})
+                path.write_text(json.dumps(record))
+
+    def test_positive_summaries_sources_and_repeatability(self):
+        import re
+        with tempfile.TemporaryDirectory() as tmp:
+            for fixture in sorted((ROOT / "skills/fixtures").glob("*/record.json")):
+                kind = "design" if fixture.parent.name.startswith("design") else "audit"
+                validator = "validate_judgments.py" if kind == "design" else "validate_findings.py"
+                result = self.run_script(kind, validator, fixture)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                counts = json.loads(result.stdout)
+                source = fixture
+                if kind == "audit":
+                    source = Path(tmp) / "routed.json"
+                    result = self.run_script(kind, "route_failures.py", fixture, "--output", source)
+                    self.assertEqual(result.returncode, 0, result.stdout)
+                output = Path(tmp) / "result.md"
+                renderer = "render_plan.py" if kind == "design" else "render_findings.py"
+                result = self.run_script(kind, renderer, source, "--output", output)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                text = output.read_text()
+                summary = text.split("## Summary\n", 1)[1].split("\n## ", 1)[0]
+                if kind == "design":
+                    for key in ("apply", "reject", "undecided"):
+                        self.assertIn(f'{key}: {counts[key]}', summary.lower())
+                    self.assertIn(f'unknown verdicts: {counts["unknown"]}', summary)
+                else:
+                    self.assertIn(f'Defects: {counts["defects"]}', summary)
+                    for key, count in counts["statuses"].items():
+                        self.assertIn(f'- {key}: {count}\n', summary)
+                    for key, count in counts["severity"].items():
+                        self.assertIn(f'{key}: {count}', summary)
+                body, sources = text.split("## Sources\n", 1)
+                definitions = re.findall(r"^\[([^]]+)\]:", sources, re.M)
+                used = re.findall(r"\[[^]\n]+\]\[([^]\n]+)\]", body)
+                self.assertTrue(definitions)
+                self.assertEqual(len(definitions), len(set(definitions)))
+                self.assertEqual(set(definitions), set(used))
+                first = output.read_bytes()
+                self.run_script(kind, renderer, source, "--output", output)
+                self.assertEqual(output.read_bytes(), first)
+
+    def test_common_field_boundaries(self):
+        for kind, folder, validator in (("design", "design-sound", "validate_judgments.py"),
+                                        ("audit", "audit-known-defect", "validate_findings.py")):
+            original = json.loads((ROOT / "skills/fixtures" / folder / "record.json").read_text())
+            bad_values = [("assumptions", None, "assumptions"),
+                          ("assumptions", [{"topic": "x", "statement": " "}], "assumptions"),
+                          ("measurements", [{"id": "m", "command": "x", "env": {}, "exit_code": True,
+                                              "artifact_revision": "", "log": None, "note": ""}], "measurements"),
+                          ("artifact_identity", {"revision": 4, "files": []}, "artifact-identity"),
+                          ("unavailable_sources", [{"unavailable": False, "source_url": "x", "reason": "x"}], "unavailable-sources")]
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "record.json"
+                for field, value, rule in bad_values:
+                    record = copy.deepcopy(original); record[field] = value
+                    path.write_text(json.dumps(record))
+                    result = self.run_script(kind, validator, path)
+                    self.assertEqual(result.returncode, 3, result.stderr)
+                    self.assertIn(rule, {e["rule"] for e in json.loads(result.stdout)})
+
+    def test_optional_fields_render_and_remain_absent_safe(self):
+        for kind, folder, validator, renderer in (
+            ("design", "design-sound", "validate_judgments.py", "render_plan.py"),
+            ("audit", "audit-known-defect", "validate_findings.py", "render_findings.py")):
+            record = json.loads((ROOT / "skills/fixtures" / folder / "record.json").read_text())
+            record["artifact_identity"] = {"revision": "fixture-revision", "files": [{"path": "check.py", "sha256": "a" * 64}]}
+            record["measurements"] = [{"id": "probe", "command": "python3 check.py", "env": {"MODE": "test"}, "exit_code": 0, "artifact_revision": "fixture-revision", "log": "probe.log", "note": "Observed only."}]
+            record["unavailable_sources"] = [{"unavailable": True, "source_url": "https://example.invalid/source", "reason": "offline"}]
+            with tempfile.TemporaryDirectory() as tmp:
+                path, output = Path(tmp) / "record.json", Path(tmp) / "output.md"
+                for present in (True, False):
+                    if not present:
+                        for key in ("artifact_identity", "measurements", "unavailable_sources", "priority"):
+                            record.pop(key, None)
+                    path.write_text(json.dumps(record))
+                    result = self.run_script(kind, validator, path)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    if kind == "audit":
+                        routed = self.run_script(kind, "route_failures.py", path)
+                        path.write_text(routed.stdout)
+                    result = self.run_script(kind, renderer, path, "--output", output)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    text = output.read_text()
+                    self.assertEqual("Artifact identity:" in text, present)
+                    self.assertEqual("## Measurements" in text, present)
+                    self.assertEqual('"unavailable": true' in text, present)
+                    if present:
+                        self.assertLess(text.index("Artifact identity:"), text.index("## Assumptions"))
+                        self.assertLess(text.index("## Assumptions"), text.index("## Measurements"))
+                        self.assertLess(text.index("## Measurements"), text.index("## Summary"))
+                        self.assertIn("- probe:", text)
+                        self.assertIn("1 files", text)
+                        self.assertIn("a" * 64, text)
+                    if kind == "design":
+                        self.assertIn("Instantiation:", text)
+
+    def test_outside_observation_cannot_replace_coverage_or_route(self):
+        record = json.loads((ROOT / "skills/fixtures/audit-known-defect/record.json").read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "record.json"
+            for mutation, rule in (({"free": False}, "coverage"), ({"cards": []}, "routing"),
+                                   ({"failure": "unmapped"}, "failure")):
+                bad = copy.deepcopy(record)
+                bad["checks"][-1].update(mutation)
+                path.write_text(json.dumps(bad))
+                result = self.run_script("audit", "validate_findings.py", path)
+                self.assertEqual(result.returncode, 3)
+                self.assertIn(rule, {e["rule"] for e in json.loads(result.stdout)})
 
 
 if __name__ == "__main__":

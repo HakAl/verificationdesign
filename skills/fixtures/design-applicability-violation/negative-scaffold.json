@@ -1,0 +1,952 @@
+{
+  "corpus_revision": "e632a86b2ca8fbb7f83b3130ba083784c7817667",
+  "artifact": "fixture",
+  "scope": "fixture checks",
+  "assumptions": [
+    {
+      "topic": "verification-path",
+      "statement": ""
+    }
+  ],
+  "workflow": {
+    "generated": "",
+    "generator": "",
+    "completion_signal": "",
+    "self_review_points": []
+  },
+  "cards": [
+    {
+      "id": "context-and-state/constitution",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "multiple agents or tools evaluate the same artifact",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "verification reports need to be auditable",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "criteria drift is causing inconsistent judgments",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "prompts contain repeated pass/fail language",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "failures must be compared across runs",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "human reviewers need to know what the system actually checked.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the workflow is exploratory and no criteria are known yet",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a single human is manually reviewing one-off output",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the criteria are intentionally subjective and cannot yet be operationalized.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "context-and-state/guardrail-decorator",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the framework supports lifecycle hooks at model, tool, retriever, or output boundaries",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "policy enforcement gates side effects such as file writes, network calls, deletions, charges, sends, or deploys",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "policy needs to survive prompt rewrites, persona tests, and context compaction",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "audit requires a decision log per call",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the policy can be expressed as a deterministic decision function rather than a subjective judgment.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the policy is genuinely subjective and a Judge Harness is the right verifier",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the framework's call boundaries cannot be wrapped",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a one-off conditional in the call site is clearer than registering a decorator",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "shape normalization is the actual need, which belongs on Tool Adapter.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "context-and-state/causal-tag",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the agent emits events into shared logs, traces, message buses, APIs, or side-effect targets",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "multiple agents, runs, or producers share the same event surface",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "async timing, batching, or reordering makes temporal proximity unreliable",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "verification must attribute an observed effect to a specific action",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a framework tracing layer exists but is not yet engaged.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the event surface is fully private to the test or run",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "State Baseline plus Delta gives equivalent attribution more cheaply",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the boundary cannot carry any metadata and cannot be changed",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the side effect is low stakes and misattribution cost is negligible.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "context-and-state/trajectory-cursor",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "an agent runs more than two tool calls per task",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "permission, retry, fallback, or denial paths exist outside the main action flow",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "verification needs to prove which steps executed, not which the agent narrated",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a loop can stall, repeat, or skip required actions",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "pause, replay, or human-in-the-loop resume matters.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the workflow is a single-shot model call with no loop",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the framework already persists a structured trajectory and another cursor would duplicate state",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the process is a deterministic transformation pipeline with no agent decisions",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the only verification question is final-state causality, where State Baseline or Delta is enough.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "context-and-state/state-baseline",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the environment is shared, persistent, or reused across runs",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a pre-existing object could satisfy the post-condition",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "concurrent activity can create, delete, or mutate matching state",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the action is destructive and needs an audit trail",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verifier needs to prove causation, not merely observe a final condition.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the environment is fully ephemeral and recreated for each run",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the state surface is too large and the assertion is low stakes",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verified property is purely internal to a deterministic function call",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a Causal Tag can identify the agent's own artifacts more directly",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a pre-state read would itself change the system under test.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "verification/executable-analog",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the claim being verified can be expressed as a deterministic check",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the output has structure (DOM, JSON, exit code, log line) that can be queried",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "you can write a test rather than just describe one",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the same check will run repeatedly (regression, CI, multi-agent loops)",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verification trail needs to be auditable.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the property is genuinely subjective and has no programmatic surface (tone, readability, design taste)",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the extractor would be more brittle than the LLM judgment it replaces",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the cost of writing the executable check exceeds the cost of one-off human review",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the claim is exploratory and \"good\" is not yet defined.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "verification/blind-oracle",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the property under check has a derivable expected value, such as math, parses, structural counts, or executable checks",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "false positives from draft-anchored judgment are a known failure mode",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the spec or reference can be processed independently of the draft",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "generation and verification share a context window",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verifier is LLM-based and could otherwise be conditioned on the draft.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "expected cannot be derived without reading the draft",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "Executable Analog can specialize the pattern with compilation, execution, or runtime traces",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "no expected exists and the right pattern is Admissibility Gate or a calibrated Judge Harness",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the artifact and the spec are the same object and derivation must reference the artifact.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "verification/comparator",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the check has a known expected value, pattern, reference object, or expected event sequence",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the observed value can be extracted separately from the comparison",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a named operator covers the comparison or can be defined cheaply",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the report must be auditable without rerunning a model",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the same comparison will run repeatedly in CI, regression tests, or agent loops.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the answer is genuinely open-ended and no reference exists",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "semantic equivalence is the actual task and a tight comparator would reject acceptable answers",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "designing a comparator costs more than a one-off human review",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the comparison needs a calibrated model judge. Use Judge Harness instead of an inline fused judgment.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "verification/delta",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the environment is shared, persistent, or carries non-trivial pre-existing state",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the metric being measured exists in the environment before the agent acts",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "concurrent activity is possible and the metric can be scoped, locked, or paired with Causal Tag",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the assertion needs to prove the state changed during the agent's verification window, with causal attribution handled by scoping, exclusive access, or Causal Tag when concurrency is present.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the environment is fully ephemeral (fresh container per run, mocked DB)",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the metric does not exist pre-action and only the absolute post-state is meaningful",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "you cannot capture a baseline before the agent acts (e.g., the agent is invoked black-box)",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the action is destructive or non-replayable and a pre-state read would alter the outcome.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "verification/judge-harness",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the verification path uses an LLM-based judge",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verdict is high leverage, such as a gate for promotion, training, deployment, or automation",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "false positives or false negatives are costly enough to justify multi-sample budget",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "human labels exist or can be collected for a calibration set",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the judge family has documented bias modes that can be perturbed against.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "verification is fully executable, so an Executable Analog or Comparator can decide it without an LLM",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verdict is low leverage and a single-sample judge call is proportionate",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "no calibration set can be obtained and the harness would aggregate without an anchor",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the budget for repetitions is unavailable and the alternative is no judge at all.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "verification/admissibility-gate",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "the verifier checks work produced by an LLM",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "false approvals are more costly than false rejections",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the task has known shortcut paths or lookalike evidence",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "generation and verification share a model family or context",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the rubric will be reused across many runs.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the task is genuinely iterative and evaluator-optimizer is the desired loop",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the output is exploratory and no one has defined what \"wrong\" means yet",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "strict admissibility would reject too many acceptable answers",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a named Comparator or Executable Analog can decide the check directly",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the right escalation is a calibrated Judge Harness around a subjective property.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "orchestration/cross-family",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "an LLM-based judge or evaluator is on the verification path",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the same provider serves both generation and verification by default",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verification result gates promotion, training, deployment, or downstream automation",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "optimization-time advice steers a model being shaped",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "audit context requires verifier identity to be recorded.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "verification is fully executable, so an Executable Analog or Comparator can decide it without an LLM judge",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "only one provider is reachable and provider diversity cannot be added",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verification is low leverage and misattribution cost is negligible",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the boundary cannot carry verifier identity metadata.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "orchestration/adversary",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "a single proposer's blind spots are costly",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the workflow can afford a second role",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the system needs an explicit failure-search step before release",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the critique should create a routable artifact, not only prose",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "later Backpressure, Escalation Chain, or Debate steps need a negative signal.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the task is trivial and a second role would add process noise",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the critic would be the same model, same prompt context, and same family, with no recorded independence",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "an Executable Analog or Comparator can decide the property without an LLM critic",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the desired structure is multi-round disagreement among several roles. Use Debate for that.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "orchestration/debate",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "a high-stakes decision benefits from several perspectives",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a single Adversary pass is too narrow",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the system can afford multiple roles and bounded rounds",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the decision needs an auditable vote, threshold, or turn record",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "unresolved disagreement should route to Escalation Chain or Backpressure.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "a single critic is enough. Use Adversary",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "an Executable Analog or Comparator can decide the property directly",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "token, latency, or provider cost cannot support multiple turns",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "all debaters are the same model, same prompt, and same family, with no recorded diversity.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "orchestration/escalation-chain",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "failures or low-confidence decisions should route to a more capable handler",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the system has tiers, specialists, managers, or humans",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the next handler must be auditable",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "unresolved Adversary or Debate findings need a stronger route",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "same-family retry would be insufficient evidence of independence.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "a flat single-handler design is enough",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "an Executable Analog or Comparator can decide the property without routing",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the proposed target is the same model, same prompt, and same family",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "there is no owner capable of handling the escalated work",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the chain cannot enforce a maximum depth.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "orchestration/backpressure",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "a downstream verifier can fail recoverably",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the upstream step can consume corrective feedback",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "bounded automatic revision is cheaper than immediate escalation",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "a recorded retry trail is useful for audit or debugging",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "an Adversary, Comparator, or guardrail can produce a concrete failure reason.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "the failure is non-recoverable and should escalate immediately",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the upstream step cannot consume feedback",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "an Executable Analog passes deterministically without revision",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "retry cost is unacceptable",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the verifier cannot state what failed.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "id": "orchestration/tool-adapter",
+      "decision": "",
+      "reason": "",
+      "use_when": [
+        {
+          "condition": "a model calls tools with structured arguments",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "tools have typed functions or external protocol schemas",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "malformed arguments could cause side effects",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "audit requires a single owner for tool format",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "observations need to be consumed by later verification or trajectory steps.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ],
+      "do_not_use_when": [
+        {
+          "condition": "there is a single trivial tool with no arguments",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the framework already provides a typed tool boundary and double-wrapping would add no signal",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the wrapper enforces policy rather than adapting types. Use Guardrail Decorator",
+          "verdict": "",
+          "evidence": ""
+        },
+        {
+          "condition": "the call is fully internal and no model output crosses the boundary.",
+          "verdict": "",
+          "evidence": ""
+        }
+      ]
+    }
+  ]
+}

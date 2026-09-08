@@ -8,11 +8,34 @@ Corpus revision: `e632a86b2ca8fbb7f83b3130ba083784c7817667`
 
 Corpus tag: `corpus/v1.0.0`
 
+## Assumptions
+
+None.
+
+## Summary
+
+Defects: 0. high: 0; medium: 0; low: 0.
+
+- defect: 0
+- sound: 0
+- not-applicable: 0
+- not-checked: 0
+- insufficient-evidence: 18
+- out-of-scope: 0
+
+Unmapped defects:
+
+None.
+
 ## Defects
 
 None.
 
 ## Checked and sound
+
+None.
+
+## Not applicable
 
 None.
 
@@ -24,108 +47,126 @@ None.
 
 ### Principle 1
 
-What external observation, distinct from the generator saying done, records completion? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#1-external-signals-over-self-review)
+What external observation, distinct from the generator saying done, records completion? [Principles][p1]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 1
 
-Which expected and observed values are recorded for each completion check? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#1-external-signals-over-self-review)
+Which expected and observed values are recorded for each completion check? [Principles][p1]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
-
-### Principle 2
-
-Who evaluates the generated output, and what evidence separates that evaluator from the generator? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#2-independence-between-generation-and-verification)
-
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 2
 
-Which generator context is withheld from the verifier, and where is that boundary recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#2-independence-between-generation-and-verification)
+Who evaluates the generated output, and what evidence separates that evaluator from the generator? [Principles][p2]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+
+### Principle 2
+
+Which generator context is withheld from the verifier, and where is that boundary recorded? [Principles][p2]
+
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 3
 
-Which intermediate steps emit observable signals before the final completion decision? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#3-step-level-checkpoints)
+Which intermediate steps emit observable signals before the final completion decision? [Principles][p3]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 3
 
-Where are a failed checkpoint and the resulting stop or escalation recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#3-step-level-checkpoints)
+Where are a failed checkpoint and the resulting stop or escalation recorded? [Principles][p3]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
-
-### Principle 4
-
-Which checks search for a counterexample to completion, with the observed result recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)
-
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 4
 
-What evidence shows that a failing artifact can be rejected by the verification procedure? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)
+Which checks search for a counterexample to completion, with the observed result recorded? [Principles][p4]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+
+### Principle 4
+
+What evidence, recorded in the artifact, shows that a failing artifact can be rejected by the verification procedure? [Principles][p4]
+
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 5
 
-Where are the expected conditions and criterion identifiers specified before evaluation? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#5-explicit-criteria)
+Where are the expected conditions and criterion identifiers specified before evaluation? [Principles][p5]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 5
 
-How does the artifact record the criteria version used for each verdict? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#5-explicit-criteria)
+How does the artifact record the criteria version used for each verdict? [Principles][p5]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
-
-### Principle 6
-
-Which claims are checked by executable assertions or comparisons, and where are their results? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#6-executable-verification-is-king)
-
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 6
 
-Which claims still depend on judgment, and what evidence bounds those claims? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#6-executable-verification-is-king)
+Which claims are checked by executable assertions or comparisons, and where are their results? [Principles][p6]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+
+### Principle 6
+
+Which claims still depend on judgment, and what evidence bounds those claims? [Principles][p6]
+
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 7
 
-When model review is used, what generator and verifier model families are recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#7-cross-family-beats-self-verification)
+When model review is used, what generator and verifier model families are recorded? [Principles][p7]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 7
 
-What evidence supports the selected verifier for this artifact and scope? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#7-cross-family-beats-self-verification)
+What evidence supports the selected verifier for this artifact and scope? [Principles][p7]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
-
-### Principle 8
-
-When independent reviewers disagree, where are their claims and evidence recorded separately? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#8-simulate-debate)
-
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 8
 
-What explicit rule routes unresolved disagreement or stops further review? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#8-simulate-debate)
+When independent reviewers disagree, where are their claims and evidence recorded separately? [Principles][p8]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+
+### Principle 8
+
+What explicit rule routes unresolved disagreement or stops further review? [Principles][p8]
+
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 9
 
-What before-state or isolated baseline lets a check attribute its observation to this run? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#9-isolate-verification-from-ambient-state)
+What before-state or isolated baseline lets a check attribute its observation to this run? [Principles][p9]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
 
 ### Principle 9
 
-Where are run identifiers, state changes and observed deltas recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#9-isolate-verification-from-ambient-state)
+Where are run identifiers, state changes and observed deltas recorded? [Principles][p9]
 
-Evidence: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+Reason: artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.
+
+## Observed outside scope
+
+None.
+
+## Sources
+
+Corpus revision: `e632a86b2ca8fbb7f83b3130ba083784c7817667`.
+
+[p1]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#1-external-signals-over-self-review
+[p2]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#2-independence-between-generation-and-verification
+[p3]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#3-step-level-checkpoints
+[p4]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing
+[p5]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#5-explicit-criteria
+[p6]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#6-executable-verification-is-king
+[p7]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#7-cross-family-beats-self-verification
+[p8]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#8-simulate-debate
+[p9]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#9-isolate-verification-from-ambient-state

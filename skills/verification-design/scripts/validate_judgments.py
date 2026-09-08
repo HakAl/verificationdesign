@@ -4,6 +4,8 @@ import sys
 sys.dont_write_bytecode = True
 from load_catalog import cli_main, emit, load_catalog, parser, read_record
 
+from record_fields import validate_common
+
 VERDICTS = {"holds", "does-not-hold", "unknown"}
 
 
@@ -28,6 +30,7 @@ def validate(record, catalog=None):
     if not isinstance(record, dict):
         fail(None, "structure", "record must be an object")
         return errors
+    validate_common(record, fail, design=True)
     for key in ("corpus_revision", "artifact", "scope"):
         if not nonempty(record.get(key)):
             fail(None, "structure", key + " must be a non-empty string")
@@ -49,10 +52,17 @@ def validate(record, catalog=None):
     if not isinstance(cards, list):
         fail(None, "structure", "cards must be a list")
         return errors
+    if "priority" in record:
+        priority = record["priority"]
+        applied = {c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), str) and c.get("decision") == "apply"}
+        if not isinstance(priority, list) or any(not isinstance(x, str) or x not in applied for x in priority) or len(set(x for x in priority if isinstance(x, str))) != len(priority):
+            fail(None, "priority", "priority must list applied card ids without duplicates")
     for card in cards:
         if not isinstance(card, dict) or not nonempty(card.get("id")):
             fail(None, "structure", "each card needs an id")
             continue
+        if "instantiation" in card and not isinstance(card["instantiation"], str):
+            fail(card["id"], "instantiation", "instantiation must be a string")
         if not nonempty(card.get("reason")):
             fail(card["id"], "structure", "reason must be non-empty")
         for group in ("use_when", "do_not_use_when"):
@@ -97,6 +107,13 @@ def validate(record, catalog=None):
     return errors
 
 
+def counts(record):
+    return dict(cards=len(record["cards"]), **{
+        d: sum(c["decision"] == d for c in record["cards"]) for d in ("apply", "reject", "undecided")},
+        unknown=sum(c["verdict"] == "unknown" for card in record["cards"]
+                    for group in ("use_when", "do_not_use_when") for c in card[group]))
+
+
 def main():
     p = parser(__doc__, "python3 scripts/validate_judgments.py record.json")
     p.add_argument("record", help="JSON judgment record")
@@ -107,8 +124,7 @@ def main():
         emit(errors)
         print("judgment validation failed", file=sys.stderr)
         return 3
-    emit(dict(valid=True, cards=len(record["cards"]), **{
-        d: sum(c["decision"] == d for c in record["cards"]) for d in ("apply", "reject", "undecided")}))
+    emit(dict(valid=True, **counts(record)))
     return 0
 
 

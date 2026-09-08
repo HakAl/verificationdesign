@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""Scaffold an unfilled record from packaged fields without making judgments."""
+import sys
+sys.dont_write_bytecode = True
+from load_catalog import cli_main, emit, load_catalog, parser
+import json
+from pathlib import Path
+
+
+
+def scaffold(artifact, scope):
+    catalog, _ = load_catalog()
+    record = dict(corpus_revision=catalog["revision"], artifact=artifact, scope=scope,
+                  assumptions=[{"topic": "verification-path", "statement": ""}])
+    record["workflow"] = dict(generated="", generator="", completion_signal="", self_review_points=[])
+    record["cards"] = [dict(id=c["id"], decision="", reason="", **{
+        group: [dict(condition=text, verdict="", evidence="") for text in c[group]]
+        for group in ("use_when", "do_not_use_when")}) for c in catalog["cards"]]
+    return record
+
+
+def main():
+    p = parser(__doc__, "python3 scripts/scaffold_record.py --artifact project --scope checks --output record.json")
+    p.add_argument("--artifact", required=True)
+    p.add_argument("--scope", required=True)
+    p.add_argument("--output", required=True, metavar="FILE|-", help="JSON record destination; stdout includes record and counts in one envelope")
+    args = p.parse_args()
+    record = scaffold(args.artifact, args.scope)
+    counts = {"cards": len(record["cards"]), "conditions": sum(len(c[g]) for c in record["cards"] for g in ("use_when", "do_not_use_when"))}
+    if args.output == "-":
+        emit(dict(record=record, counts=counts))
+    else:
+        Path(args.output).write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        emit(dict(output=args.output, counts=counts))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(cli_main(main))

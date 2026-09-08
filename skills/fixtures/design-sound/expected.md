@@ -8,6 +8,27 @@ Corpus revision: `e632a86b2ca8fbb7f83b3130ba083784c7817667`
 
 Corpus tag: `corpus/v1.0.0`
 
+## Assumptions
+
+- verification-path: The executable fixture check and its documented completion signal.
+
+## Measurements
+
+- fixture-check: command `python3 artifact/check.py`; env `{}`; exit 0; artifact revision ``; log none; note: Reproduced during fixture update; stdout was empty.
+
+## Summary
+
+Apply: 2; reject: 15; undecided: 0; unknown verdicts: 0.
+
+Operator decisions:
+
+None.
+
+Recommended order:
+
+1. Executable Analog
+2. Comparator
+
 ## Workflow characterization
 
 Generated: A pure Python square function.
@@ -16,13 +37,15 @@ Generator: A one-shot code-generating agent.
 
 Completion signal: Existing local equality assertions exit successfully.
 
-Self-review points: None recorded.
+Self-review points:
+
+None recorded.
 
 ## Patterns applied
 
 ### Executable Analog
 
-[Executable Analog](https://verificationdesign.com/patterns/verification/executable-analog/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/executable-analog.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Executable Analog][executable-analog] ([pinned source][executable-analog-src])
 
 An assertion compares the pure function result against a specified integer, repeatedly in a local regression check.
 
@@ -41,9 +64,11 @@ Observable signals:
 
 Determinism move: Executable Analog constrains `self_review_bias` (the same agent that produced the artifact no longer judges whether it satisfies the check) and `judge_subjectivity` (the verdict comes from a deterministic equality on extracted values, not from a model's interpretation of rendered output). By forcing extract-then-compare instead of interpret-and-decide, the system loses the freedom to rationalize a coincidental pass.
 
+Instantiation: The fixture check emits a pass only after its asserted comparison holds.
+
 ### Comparator
 
-[Comparator](https://verificationdesign.com/patterns/verification/comparator/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/comparator.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Comparator][comparator] ([pinned source][comparator-src])
 
 Expected and observed integers are separate and equality is the named comparison operator.
 
@@ -68,11 +93,11 @@ Determinism move: Comparator constrains `judge_subjectivity` by making the verdi
 
 ### Constitution
 
-[Constitution](https://verificationdesign.com/patterns/context-and-state/constitution/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/constitution.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Constitution][constitution] ([pinned source][constitution-src])
 
 The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs.
 
-- use_when: multiple agents or tools evaluate the same artifact (does-not-hold). Evidence: artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs.
+- use_when: multiple agents or tools evaluate the same artifact (does-not-hold). Evidence: artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs. Measurement fixture-check records the executable run.
 - use_when: verification reports need to be auditable (does-not-hold). Evidence: artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs.
 - use_when: criteria drift is causing inconsistent judgments (does-not-hold). Evidence: artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs.
 - use_when: prompts contain repeated pass/fail language (does-not-hold). Evidence: artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs.
@@ -81,7 +106,7 @@ The small local harness has one executable check, no audit report consumer, no d
 
 ### Guardrail Decorator
 
-[Guardrail Decorator](https://verificationdesign.com/patterns/context-and-state/guardrail-decorator/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/guardrail-decorator.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Guardrail Decorator][guardrail-decorator] ([pinned source][guardrail-decorator-src])
 
 No lifecycle hooks, policy enforcement or model tool boundary exists; the function receives ordinary local integers.
 
@@ -93,7 +118,7 @@ No lifecycle hooks, policy enforcement or model tool boundary exists; the functi
 
 ### Causal Tag
 
-[Causal Tag](https://verificationdesign.com/patterns/context-and-state/causal-tag/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/causal-tag.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Causal Tag][causal-tag] ([pinned source][causal-tag-src])
 
 No shared event surface or asynchronous work exists; each result is a private function return.
 
@@ -102,7 +127,7 @@ No shared event surface or asynchronous work exists; each result is a private fu
 
 ### Trajectory Cursor
 
-[Trajectory Cursor](https://verificationdesign.com/patterns/context-and-state/trajectory-cursor/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/trajectory-cursor.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Trajectory Cursor][trajectory-cursor] ([pinned source][trajectory-cursor-src])
 
 Generation is one-shot and the check has no agent decisions, retries or pause/resume path.
 
@@ -111,7 +136,7 @@ Generation is one-shot and the check has no agent decisions, retries or pause/re
 
 ### State Baseline
 
-[State Baseline](https://verificationdesign.com/patterns/context-and-state/state-baseline/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/state-baseline.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[State Baseline][state-baseline] ([pinned source][state-baseline-src])
 
 The property is internal to a deterministic function; there is no mutable environment.
 
@@ -119,7 +144,7 @@ The property is internal to a deterministic function; there is no mutable enviro
 
 ### Blind Oracle
 
-[Blind Oracle](https://verificationdesign.com/patterns/verification/blind-oracle/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/blind-oracle.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Blind Oracle][blind-oracle] ([pinned source][blind-oracle-src])
 
 Expected can be derived, but the executable assertion specializes the pattern and no model judge is used.
 
@@ -127,7 +152,7 @@ Expected can be derived, but the executable assertion specializes the pattern an
 
 ### Delta
 
-[Delta](https://verificationdesign.com/patterns/verification/delta/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/delta.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Delta][delta] ([pinned source][delta-src])
 
 No environmental metric or mutation exists; the only observation is a private function return.
 
@@ -136,7 +161,7 @@ No environmental metric or mutation exists; the only observation is a private fu
 
 ### Judge Harness
 
-[Judge Harness](https://verificationdesign.com/patterns/verification/judge-harness/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/judge-harness.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Judge Harness][judge-harness] ([pinned source][judge-harness-src])
 
 Verification is executable and low stakes; no model judge or calibration set exists.
 
@@ -145,7 +170,7 @@ Verification is executable and low stakes; no model judge or calibration set exi
 
 ### Admissibility Gate
 
-[Admissibility Gate](https://verificationdesign.com/patterns/verification/admissibility-gate/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/admissibility-gate.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Admissibility Gate][admissibility-gate] ([pinned source][admissibility-gate-src])
 
 The generated function has a directly executable correctness check; no model approval is needed.
 
@@ -153,7 +178,7 @@ The generated function has a directly executable correctness check; no model app
 
 ### Cross-Family
 
-[Cross-Family](https://verificationdesign.com/patterns/orchestration/cross-family/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/cross-family.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Cross-Family][cross-family] ([pinned source][cross-family-src])
 
 No model judge evaluates the result; the local assertion decides it.
 
@@ -162,7 +187,7 @@ No model judge evaluates the result; the local assertion decides it.
 
 ### Adversary
 
-[Adversary](https://verificationdesign.com/patterns/orchestration/adversary/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/adversary.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Adversary][adversary] ([pinned source][adversary-src])
 
 The executable comparison decides the property without a critic role.
 
@@ -171,7 +196,7 @@ The executable comparison decides the property without a critic role.
 
 ### Debate
 
-[Debate](https://verificationdesign.com/patterns/orchestration/debate/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/debate.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Debate][debate] ([pinned source][debate-src])
 
 The executable comparison decides the property without rounds or votes.
 
@@ -180,7 +205,7 @@ The executable comparison decides the property without rounds or votes.
 
 ### Escalation Chain
 
-[Escalation Chain](https://verificationdesign.com/patterns/orchestration/escalation-chain/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/escalation-chain.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Escalation Chain][escalation-chain] ([pinned source][escalation-chain-src])
 
 A failed check stops the local run; no handler hierarchy or automatic routing exists.
 
@@ -189,7 +214,7 @@ A failed check stops the local run; no handler hierarchy or automatic routing ex
 
 ### Backpressure
 
-[Backpressure](https://verificationdesign.com/patterns/orchestration/backpressure/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/backpressure.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Backpressure][backpressure] ([pinned source][backpressure-src])
 
 The one-shot generator cannot consume check feedback; no revision loop is requested.
 
@@ -197,7 +222,7 @@ The one-shot generator cannot consume check feedback; no revision loop is reques
 
 ### Tool Adapter
 
-[Tool Adapter](https://verificationdesign.com/patterns/orchestration/tool-adapter/); [pinned source](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/tool-adapter.md); revision `e632a86b2ca8fbb7f83b3130ba083784c7817667`
+[Tool Adapter][tool-adapter] ([pinned source][tool-adapter-src])
 
 No model-produced tool arguments cross a boundary; the function is called internally.
 
@@ -207,4 +232,49 @@ No model-produced tool arguments cross a boundary; the function is called intern
 
 None in the judgment record.
 
-Unavailable source text: paste any unavailable JSON results here; source availability was not verified by this renderer.
+```json
+{
+  "unavailable": true,
+  "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md",
+  "reason": "offline"
+}
+```
+
+## Sources
+
+Corpus revision: `e632a86b2ca8fbb7f83b3130ba083784c7817667`.
+
+[executable-analog]: https://verificationdesign.com/patterns/verification/executable-analog/
+[executable-analog-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/executable-analog.md
+[comparator]: https://verificationdesign.com/patterns/verification/comparator/
+[comparator-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/comparator.md
+[constitution]: https://verificationdesign.com/patterns/context-and-state/constitution/
+[constitution-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/constitution.md
+[guardrail-decorator]: https://verificationdesign.com/patterns/context-and-state/guardrail-decorator/
+[guardrail-decorator-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/guardrail-decorator.md
+[causal-tag]: https://verificationdesign.com/patterns/context-and-state/causal-tag/
+[causal-tag-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/causal-tag.md
+[trajectory-cursor]: https://verificationdesign.com/patterns/context-and-state/trajectory-cursor/
+[trajectory-cursor-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/trajectory-cursor.md
+[state-baseline]: https://verificationdesign.com/patterns/context-and-state/state-baseline/
+[state-baseline-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/state-baseline.md
+[blind-oracle]: https://verificationdesign.com/patterns/verification/blind-oracle/
+[blind-oracle-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/blind-oracle.md
+[delta]: https://verificationdesign.com/patterns/verification/delta/
+[delta-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/delta.md
+[judge-harness]: https://verificationdesign.com/patterns/verification/judge-harness/
+[judge-harness-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/judge-harness.md
+[admissibility-gate]: https://verificationdesign.com/patterns/verification/admissibility-gate/
+[admissibility-gate-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/admissibility-gate.md
+[cross-family]: https://verificationdesign.com/patterns/orchestration/cross-family/
+[cross-family-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/cross-family.md
+[adversary]: https://verificationdesign.com/patterns/orchestration/adversary/
+[adversary-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/adversary.md
+[debate]: https://verificationdesign.com/patterns/orchestration/debate/
+[debate-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/debate.md
+[escalation-chain]: https://verificationdesign.com/patterns/orchestration/escalation-chain/
+[escalation-chain-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/escalation-chain.md
+[backpressure]: https://verificationdesign.com/patterns/orchestration/backpressure/
+[backpressure-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/backpressure.md
+[tool-adapter]: https://verificationdesign.com/patterns/orchestration/tool-adapter/
+[tool-adapter-src]: https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/ai-design-patterns/cards/tool-adapter.md

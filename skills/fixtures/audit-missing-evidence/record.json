@@ -68,7 +68,7 @@
     },
     {
       "principle": 4,
-      "question": "What evidence shows that a failing artifact can be rejected by the verification procedure? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)",
+      "question": "What evidence, recorded in the artifact, shows that a failing artifact can be rejected by the verification procedure? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)",
       "status": "insufficient-evidence",
       "evidence": "artifact/workflow.md:3-5 describes deployed behavior but supplies no run evidence. A deployed run trace, the checker implementation and its expected/observed results would settle this question.",
       "failure": null,
@@ -165,5 +165,6 @@
       "failure_note": "",
       "severity": null
     }
-  ]
+  ],
+  "assumptions": []
 }

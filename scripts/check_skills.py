@@ -136,7 +136,49 @@ def fixture_checks(report):
                     negative_errors.append(f"{bad.name}: exit={result.returncode}, rules={rules}, expected={expected}")
     report.check("fixture validators", positive, 4, errors)
     report.check("fixture renders", rendered, 4, render_errors)
-    report.check("negative fixtures", negative, 6, negative_errors)
+    report.check("negative fixtures", negative, 14, negative_errors)
+
+
+def helper_checks(report):
+    scaffolds, citations = 0, 0
+    scaffold_errors, citation_errors = [], []
+    with tempfile.TemporaryDirectory(prefix="verification-helpers-") as tmp:
+        root = Path(tmp)
+        (root / "example.txt").write_text("first\nsecond\n")
+        for name in NAMES:
+            scripts = SKILLS / name / "scripts"
+            design = name.endswith("design")
+            path = root / "record.json"
+            result = run([sys.executable, str(scripts / "scaffold_record.py"), "--artifact", "example", "--scope", "checks", "--output", str(path)])
+            validator = scripts / ("validate_judgments.py" if design else "validate_findings.py")
+            scaffold_receipt = result.stdout.strip()
+            try:
+                scaffold_receipt = json.dumps(json.loads(scaffold_receipt).get("counts"), sort_keys=True)
+            except ValueError:
+                pass
+            validation = run([sys.executable, str(validator), str(path)])
+            expected = {"assumptions", "structure"} if design else {"status", "evidence"}
+            expected_counts = {"cards": 17, "conditions": 156} if design else {"checks": 18}
+            try:
+                good = result.returncode == 0 and json.loads(result.stdout)["counts"] == expected_counts and validation.returncode == 3 and {e["rule"] for e in json.loads(validation.stdout)} == expected
+            except (ValueError, KeyError, TypeError):
+                good = False
+            scaffolds += good
+            if not good:
+                scaffold_errors.append(name + ": " + result.stdout + result.stderr + validation.stdout + validation.stderr)
+            path.write_text(json.dumps({"evidence": "example.txt:1-2 absent.txt:1 example.txt:3 example.txt:1-2"}))
+            result = run([sys.executable, str(scripts / "check_citations.py"), str(path), "--root", str(root)])
+            try:
+                data = json.loads(result.stdout)
+                good = result.returncode == 3 and data["counts"] == {"found": 1, "missing": 1, "out-of-bounds": 1} and len(data["citations"]) == 2
+            except (ValueError, KeyError, TypeError):
+                good = False
+            citations += good
+            if not good:
+                citation_errors.append(name + ": " + result.stdout + result.stderr)
+            print(f'INFO {name} scaffold counts: {scaffold_receipt}; citation self-test counts: {json.dumps(data.get("counts"), sort_keys=True) if good else result.stdout.strip()}')
+    report.check("scaffolds fail validation", scaffolds, 2, scaffold_errors)
+    report.check("citation checker self-tests", citations, 2, citation_errors)
 
 
 def reference_check(report, enabled):
@@ -278,6 +320,7 @@ def main():
     good = sum(any(expected_prefix + a + ")" in q for a in anchors) for q in questions)
     report.check("checklist pinned anchors", good, 18)
     fixture_checks(report)
+    helper_checks(report)
     expected_tests = unittest.defaultTestLoader.discover(str(ROOT / "scripts/tests")).countTestCases()
     result = run([sys.executable, "-m", "unittest", "discover", "-s", "scripts/tests"])
     match = re.search(r"Ran (\d+) tests?", result.stderr)

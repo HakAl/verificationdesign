@@ -1,13 +1,14 @@
 {
   "corpus_revision": "e632a86b2ca8fbb7f83b3130ba083784c7817667",
-  "artifact": "skills/fixtures/audit-known-defect/artifact",
-  "scope": "Check generator/verifier independence in the inventory summary workflow.",
+  "artifact": "fixture",
+  "scope": "fixture checks",
+  "assumptions": [],
   "checks": [
     {
       "principle": 1,
       "question": "What external observation, distinct from the generator saying done, records completion? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#1-external-signals-over-self-review)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -15,8 +16,8 @@
     {
       "principle": 1,
       "question": "Which expected and observed values are recorded for each completion check? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#1-external-signals-over-self-review)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -24,17 +25,17 @@
     {
       "principle": 2,
       "question": "Who evaluates the generated output, and what evidence separates that evaluator from the generator? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#2-independence-between-generation-and-verification)",
-      "status": "defect",
-      "evidence": "artifact/workflow.md:3-4 names the same generating agent and context for review; artifact/generate.py:5-10 reports completion from its own text without an independent source.",
-      "failure": "The agent reviews itself and misses obvious problems.",
-      "failure_note": "The same self-review cause can affect multiple findings; this fixture records one defect.",
-      "severity": "high"
+      "status": "",
+      "evidence": "",
+      "failure": null,
+      "failure_note": "",
+      "severity": null
     },
     {
       "principle": 2,
       "question": "Which generator context is withheld from the verifier, and where is that boundary recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#2-independence-between-generation-and-verification)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -42,8 +43,8 @@
     {
       "principle": 3,
       "question": "Which intermediate steps emit observable signals before the final completion decision? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#3-step-level-checkpoints)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -51,8 +52,8 @@
     {
       "principle": 3,
       "question": "Where are a failed checkpoint and the resulting stop or escalation recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#3-step-level-checkpoints)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -60,8 +61,8 @@
     {
       "principle": 4,
       "question": "Which checks search for a counterexample to completion, with the observed result recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -69,8 +70,8 @@
     {
       "principle": 4,
       "question": "What evidence, recorded in the artifact, shows that a failing artifact can be rejected by the verification procedure? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#4-adversarial-framing)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -78,8 +79,8 @@
     {
       "principle": 5,
       "question": "Where are the expected conditions and criterion identifiers specified before evaluation? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#5-explicit-criteria)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -87,8 +88,8 @@
     {
       "principle": 5,
       "question": "How does the artifact record the criteria version used for each verdict? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#5-explicit-criteria)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -96,8 +97,8 @@
     {
       "principle": 6,
       "question": "Which claims are checked by executable assertions or comparisons, and where are their results? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#6-executable-verification-is-king)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -105,8 +106,8 @@
     {
       "principle": 6,
       "question": "Which claims still depend on judgment, and what evidence bounds those claims? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#6-executable-verification-is-king)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -114,8 +115,8 @@
     {
       "principle": 7,
       "question": "When model review is used, what generator and verifier model families are recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#7-cross-family-beats-self-verification)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -123,8 +124,8 @@
     {
       "principle": 7,
       "question": "What evidence supports the selected verifier for this artifact and scope? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#7-cross-family-beats-self-verification)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -132,8 +133,8 @@
     {
       "principle": 8,
       "question": "When independent reviewers disagree, where are their claims and evidence recorded separately? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#8-simulate-debate)",
-      "status": "not-applicable",
-      "evidence": "artifact/workflow.md:3-4 names one generating agent reviewing its own output; no independent reviewers exist to disagree.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -141,8 +142,8 @@
     {
       "principle": 8,
       "question": "What explicit rule routes unresolved disagreement or stops further review? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#8-simulate-debate)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -150,8 +151,8 @@
     {
       "principle": 9,
       "question": "What before-state or isolated baseline lets a check attribute its observation to this run? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#9-isolate-verification-from-ambient-state)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
@@ -159,22 +160,11 @@
     {
       "principle": 9,
       "question": "Where are run identifiers, state changes and observed deltas recorded? [Principles](https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md#9-isolate-verification-from-ambient-state)",
-      "status": "not-checked",
-      "evidence": "Not checked: this fixture isolates generator/verifier independence; no other check was performed.",
+      "status": "",
+      "evidence": "",
       "failure": null,
       "failure_note": "",
       "severity": null
-    },
-    {
-      "free": true,
-      "principle": null,
-      "question": "Does the workflow define a retention period?",
-      "status": "out-of-scope",
-      "evidence": "artifact/workflow.md:1-4 describes review ownership but no retention period; retention is outside the independence scope.",
-      "severity": null,
-      "failure": null,
-      "failure_note": ""
     }
-  ],
-  "assumptions": []
+  ]
 }

@@ -1,25 +1,51 @@
 # Verification findings
 
-Artifact: {artifact}
+Artifact: <resolved artifact>
 
-Scope: {scope}
+Scope: <resolved scope>
 
-Corpus revision: `{corpus_revision}`
+Corpus revision: <pin>
 
-Corpus tag: `{corpus_tag}`
+Corpus tag: <tag>
+
+Artifact identity: <optional revision, count and files>
+
+## Assumptions
+
+<rendered record content>
+
+## Measurements
+
+Optional; omit when absent.
+
+## Summary
+
+<rendered record content>
 
 ## Defects
 
-{defects}
+<rendered record content>
 
 ## Checked and sound
 
-{checked_and_sound}
+<rendered record content>
+
+## Not applicable
+
+<rendered record content>
 
 ## Not checked
 
-{not_checked}
+<rendered record content>
 
 ## Insufficient evidence
 
-{insufficient_evidence}
+<rendered record content>
+
+## Observed outside scope
+
+<rendered record content>
+
+## Sources
+
+<rendered record content>

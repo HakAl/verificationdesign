@@ -945,8 +945,8 @@
   ],
   "assumptions": [
     {
-      "topic": "verification-path",
-      "statement": "The executable fixture check and its documented completion signal."
+      "topic": "artifact-stage",
+      "statement": "Prototype."
     }
   ]
 }

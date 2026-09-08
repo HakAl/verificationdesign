@@ -948,5 +948,8 @@
       "topic": "verification-path",
       "statement": "The executable fixture check and its documented completion signal."
     }
+  ],
+  "priority": [
+    "context-and-state/constitution"
   ]
 }

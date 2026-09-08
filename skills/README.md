@@ -10,6 +10,7 @@ consistent across hosts. They do not decide whether a judgment is true.
 ## Install
 
 Python 3.11 or later is required; every script uses only the standard library.
+A startup guard refuses older Python versions with exit 2; `--check` reports the version.
 Clone or download this repository, then copy the two skill directories into the
 host's skills directory. For example, from a clone into a Claude Code project:
 
@@ -60,16 +61,17 @@ Observed invocation-control results recorded by the maintainer on 2026-09-08:
 
 | Host | Version | Scan path | Explicit-only enforced | Date |
 |---|---|---|---|---|
-| Claude Code | 2.1.263 | `.claude/skills/` | yes (tests 1 to 4) | 2026-09-08 |
+| Claude Code | 2.1.263, 2.1.265 | `.claude/skills/` | yes (tests 1 to 4) | 2026-09-08 |
 | Codex CLI | 0.153.4 | `.agents/skills/`, `~/.agents/skills/` | yes, both scopes | 2026-09-08 |
 | Copilot | not tested | | unsupported | |
 
 Other hosts are untested and may model-activate the skill. The probes observed hidden
 catalog entries, working explicit invocation and no implicit invocation, with an
 unflagged control activating. This table describes host invocation controls, not the
-correctness of these skills' judgments. Blind task-level tests of the shipped package
+correctness of these skills' judgments. Blind task-level tests of skills/v1.0.0
 (four fixtures, records and expected outputs withheld) passed on both tested hosts on
 2026-09-08; the maintainer judged each output against the fixture's expected file.
+The maintainer reruns blind host tests for v1.1.0 before tagging.
 
 SKILL.md is an ordinary readable file. The invocation flag does not prevent a model
 from opening it as a file. The package carries one non-spec top-level field,
@@ -79,7 +81,7 @@ temporary copy with exactly that one top-level line removed and verifies the dif
 
 ## Corpus and offline behavior
 
-Release `skills/v1.0.0` pins `corpus/v1.0.0`, revision
+Release `skills/v1.1.0` pins `corpus/v1.0.0`, revision
 `e632a86b2ca8fbb7f83b3130ba083784c7817667`. The packaged catalog is the only catalog
 used for decisions. A live drift report never replaces it. See [CHANGELOG.md](CHANGELOG.md).
 
@@ -101,6 +103,16 @@ stdout reports the destination. Output files are written only at the requested p
 From this repository, run `python3 scripts/check_skills.py`. The checker verifies
 pins against git, fixtures and loopback retrieval tests. `--links` adds live checks;
 `--skills-ref` adds the external spec reference validator. Neither is used in CI.
+
+## Record helpers and output location
+
+- `scripts/scaffold_record.py`: emit an unfilled record from the catalog or checklist,
+  with counts; fill and validate it before rendering.
+- `scripts/check_citations.py`: check evidence citation file existence and line bounds,
+  without judging what the cited text means.
+
+Records and outputs go in a dated directory the operator can see, beside the artifact
+or where the operator says, never in system temp storage or inside the skill directory.
 
 ## License
 

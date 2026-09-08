@@ -15,7 +15,7 @@
         {
           "condition": "multiple agents or tools evaluate the same artifact",
           "verdict": "does-not-hold",
-          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs."
+          "evidence": "artifact/workflow.md:3-16: The small local harness has one executable check, no audit report consumer, no drifting prompt criteria and no comparison of failures across runs. Measurement fixture-check records the executable run."
         },
         {
           "condition": "verification reports need to be auditable",
@@ -336,7 +336,8 @@
         }
       ],
       "decision": "apply",
-      "reason": "An assertion compares the pure function result against a specified integer, repeatedly in a local regression check."
+      "reason": "An assertion compares the pure function result against a specified integer, repeatedly in a local regression check.",
+      "instantiation": "The fixture check emits a pass only after its asserted comparison holds."
     },
     {
       "id": "verification/blind-oracle",
@@ -941,6 +942,34 @@
       ],
       "decision": "reject",
       "reason": "No model-produced tool arguments cross a boundary; the function is called internally."
+    }
+  ],
+  "assumptions": [
+    {
+      "topic": "verification-path",
+      "statement": "The executable fixture check and its documented completion signal."
+    }
+  ],
+  "priority": [
+    "verification/executable-analog",
+    "verification/comparator"
+  ],
+  "unavailable_sources": [
+    {
+      "unavailable": true,
+      "source_url": "https://raw.githubusercontent.com/verificationdesign/verificationdesign/e632a86b2ca8fbb7f83b3130ba083784c7817667/verification_design.md",
+      "reason": "offline"
+    }
+  ],
+  "measurements": [
+    {
+      "id": "fixture-check",
+      "command": "python3 artifact/check.py",
+      "env": {},
+      "exit_code": 0,
+      "artifact_revision": "",
+      "log": null,
+      "note": "Reproduced during fixture update; stdout was empty."
     }
   ]
 }

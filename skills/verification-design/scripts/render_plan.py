@@ -3,21 +3,35 @@
 import sys
 sys.dont_write_bytecode = True
 from load_catalog import cli_main, emit, load_catalog, parser, read_record, write_text
-from validate_judgments import validate
-
-
-def citation(card, revision):
-    return f'[{card["title"]}]({card["html_url"]}); [pinned source]({card["source_url"]}); revision `{revision}`'
+from validate_judgments import validate, counts
+from render_fields import header, unavailable, Sources
 
 
 def render(record, catalog, meta):
-    lines = ["# Verification plan", "", f'Artifact: {record["artifact"]}', "",
-             f'Scope: {record["scope"]}', "", f'Corpus revision: `{catalog["revision"]}`', "",
-             f'Corpus tag: `{meta["corpus-tag"]}`', "", "## Workflow characterization", ""]
+    sources = Sources()
+    lines = header("Verification plan", record, catalog, meta)
+    totals = counts(record)
+    lines += ["## Summary", "", f'Apply: {totals["apply"]}; reject: {totals["reject"]}; undecided: {totals["undecided"]}; unknown verdicts: {totals["unknown"]}.', ""]
+    by_id = {c["id"]: c for c in record["cards"]}
+    lines += ["Operator decisions:", ""]
+    undecided = [c for c in catalog["cards"] if by_id[c["id"]]["decision"] == "undecided"]
+    for card in undecided:
+        unknowns = [c["condition"] for g in ("use_when", "do_not_use_when") for c in by_id[card["id"]][g] if c["verdict"] == "unknown"]
+        lines += [f'- {card["title"]}: ' + "; ".join(unknowns)]
+    if not undecided:
+        lines += ["None."]
+    lines.append("")
+    if "priority" in record:
+        titles = {c["id"]: c["title"] for c in catalog["cards"]}
+        lines += ["Recommended order:", ""] + [f'{i}. {titles[cid]}' for i, cid in enumerate(record["priority"], 1)]
+        if not record["priority"]:
+            lines += ["None."]
+        lines.append("")
+    lines += ["## Workflow characterization", ""]
     workflow = record["workflow"]
     for key, title in (("generated", "Generated"), ("generator", "Generator"), ("completion_signal", "Completion signal")):
         lines += [f'{title}: {workflow[key]}', ""]
-    lines += ["Self-review points: " + ("; ".join(workflow["self_review_points"]) or "None recorded."), ""]
+    lines += ["Self-review points:", ""] + (["- " + p for p in workflow["self_review_points"]] or ["None recorded."]) + [""]
     by_id = {c["id"]: c for c in record["cards"]}
     for heading, selection in (("Patterns applied", "apply"), ("Patterns rejected", "reject")):
         lines += ["## " + heading, ""]
@@ -26,7 +40,7 @@ def render(record, catalog, meta):
             lines += ["None.", ""]
         for card in selected:
             judgment = by_id[card["id"]]
-            lines += ["### " + card["title"], "", citation(card, catalog["revision"]), "", judgment["reason"], ""]
+            lines += ["### " + card["title"], "", sources.card(card), "", judgment["reason"], ""]
             if selection == "apply":
                 conditions = [("use_when", c) for c in judgment["use_when"] if c["verdict"] == "holds"]
             else:
@@ -34,11 +48,15 @@ def render(record, catalog, meta):
                 if not conditions:
                     conditions = [("use_when", c) for c in judgment["use_when"]]
             for group, condition in conditions:
-                lines += [f'- {group}: {condition["condition"]} ({condition["verdict"]}). Evidence: {condition["evidence"]}']
+                lines += [f'- {group}: {condition["condition"]} ({condition["verdict"]}). {"Reason" if condition["verdict"] == "unknown" else "Evidence"}: {condition["evidence"]}']
             lines.append("")
             if selection == "apply":
                 lines += ["Observable signals:", ""] + ["- " + s for s in card["observable_signal"]]
                 lines += ["", "Determinism move: " + card["determinism_move"], ""]
+            if "instantiation" in judgment:
+                if selection != "apply":
+                    lines += ["Determinism move: " + card["determinism_move"], ""]
+                lines += ["Instantiation: " + judgment["instantiation"], ""]
     lines += ["## Not verified", ""]
     uncertain = False
     for card in catalog["cards"]:
@@ -46,12 +64,16 @@ def render(record, catalog, meta):
         unknowns = [(group, c) for group in ("use_when", "do_not_use_when") for c in judgment[group] if c["verdict"] == "unknown"]
         if judgment["decision"] == "undecided" or unknowns:
             uncertain = True
-            lines += ["### " + card["title"], "", citation(card, catalog["revision"]), "", "Decision: " + judgment["decision"], ""]
-            lines += [f'- {group}: {c["condition"]}. Reason: {c["evidence"] or "Not recorded."}' for group, c in unknowns]
+            lines += ["### " + card["title"], "", sources.card(card), "", "Decision: " + judgment["decision"], ""]
+            lines += [f'- {group}: {c["condition"].rstrip(".")}. Reason: {c["evidence"] or "Not recorded."}' for group, c in unknowns]
             lines.append("")
+            if judgment["decision"] == "undecided" and "instantiation" in judgment:
+                lines += ["Determinism move: " + card["determinism_move"], "",
+                          "Instantiation: " + judgment["instantiation"], ""]
     if not uncertain:
         lines += ["None in the judgment record.", ""]
-    lines += ["Unavailable source text: paste any unavailable JSON results here; source availability was not verified by this renderer.", ""]
+    lines += unavailable(record)
+    lines += sources.render(catalog["revision"])
     return "\n".join(lines)
 
 

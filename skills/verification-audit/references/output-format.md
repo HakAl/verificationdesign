@@ -1,47 +1,35 @@
-# Verification findings output
+# Output format
 
-The renderer writes markdown with artifact, scope, corpus revision and tag at the top.
-Use [the template](../assets/findings-template.md) as the section contract.
+Header: artifact, scope, corpus revision and tag, then optional Artifact identity with
+revision, file count and files. Assumptions is the first section, then Measurements
+only when present, then Summary.
 
-All four sections remain present even when empty (written as `None.`). Defects name
-the principle, question, evidence, failure, severity and routed cards. Every routed
-card carries its human URL, pinned source URL and corpus revision. An unmapped defect
-shows its failure_note and `no routed card`. Sound checks include evidence; the last
-two sections explain what was not checked or what evidence would settle the question.
-Order is principle number then checklist order, with free entries sorted by question.
-No fix proposals are generated or requested anywhere in this output.
+Section order:
 
-## Shape example
+1. Assumptions
+2. Measurements
+3. Summary
+4. Defects
+5. Checked and sound
+6. Not applicable
+7. Not checked
+8. Insufficient evidence
+9. Observed outside scope
+10. Sources
 
-```markdown
-# Verification findings
+Summary counts defects by severity and every status, and names unmapped defects.
+All six findings sections are always present; empty sections say `None.`.
+Mapped failure notes render when non-empty, including shared-cause notes.
+Unmapped defects say: No routed card: outside the six mapped failures; see the failure note above.
 
-Artifact: {artifact}
+Evidence labels apply to sound and defect entries and holding or not-holding conditions.
+Reason labels apply to not-checked, not-applicable, insufficient-evidence, out-of-scope
+and unknown verdicts. Do not double a final full stop. Assumptions are bullets as
+`topic: statement`; each measurement bullet begins with its id and includes all fields.
+Unavailable-source objects render as fenced JSON inside the uncertainty section.
 
-Scope: {scope}
-
-Corpus revision: `{corpus_revision}`
-
-Corpus tag: `{corpus_tag}`
-
-## Defects
-
-{defects}
-
-## Checked and sound
-
-{checked_and_sound}
-
-## Not checked
-
-{not_checked}
-
-## Insufficient evidence
-
-{insufficient_evidence}
-```
-
-`--output FILE` writes markdown and emits a JSON receipt. `--output -` emits
-`{"text": "<the rendered markdown>"}` on stdout, preserving the structured-output
-contract. Source retrieval uses the same text envelope. Validators and routing emit
-JSON directly. All file outputs use UTF-8 and LF, and reruns are byte-stable.
+Use reference-style card citations `[Title][slug] ([pinned source][slug-src])`.
+Checklist Principles citations become `[Principles][pN]` without changing the record.
+Sources contains each used card and principle-anchor definition once and one corpus
+revision line; the header also retains its revision and tag. Output is deterministic
+and byte-stable. Validation checks structure, not substantive truth.

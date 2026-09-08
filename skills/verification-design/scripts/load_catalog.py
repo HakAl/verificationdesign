@@ -10,6 +10,18 @@ from pathlib import Path
 import re
 import socket
 import sys
+
+
+def require_python():
+    """Refuse unsupported interpreters before loading or writing anything."""
+    if sys.version_info < (3, 11):
+        found = ".".join(map(str, sys.version_info[:3]))
+        print(f"Python {found} found; Python 3.11 or later required", file=sys.stderr)
+        raise SystemExit(2)
+
+
+require_python()
+
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -297,7 +309,7 @@ def main():
             raise Unavailable(args.live_url, "invalid-snapshot") from exc
         raise
     if args.check:
-        emit({"valid": True, "revision": catalog["revision"], "cards": len(catalog["cards"]),
+        emit({"python": ".".join(map(str, sys.version_info[:3])), "valid": True, "revision": catalog["revision"], "cards": len(catalog["cards"]),
               "catalog_sha256": meta["catalog-sha256"]}, args.output)
     elif args.drift:
         emit(drift(catalog, live_url=args.live_url, offline=args.offline, timeout=args.timeout), args.output)

@@ -1,48 +1,32 @@
-# Verification plan output
+# Output format
 
-The renderer writes markdown with artifact, scope, corpus revision and tag at the top.
-Use [the template](../assets/plan-template.md) as the section contract.
+Header: artifact, scope, corpus revision and tag, then optional Artifact identity with
+revision, file count and files. Assumptions is the first section, then Measurements
+only when present, then Summary.
 
-Patterns applied name the card, human URL, pinned source URL and revision, the
-holding use_when conditions with artifact evidence, observable-signal bullets and the
-determinism move. Patterns rejected name the holding exclusion and evidence, or every
-non-holding use_when when none applies. Both sections follow catalog reading order.
-Not verified includes every undecided card and every unknown condition, even if its
-card is rejected. It always includes the fixed source-availability line for the agent
-to append unavailable JSON. An empty list means no unknowns in the record, not proof
-that source text was fetched or judgments were correct.
+Section order:
 
-## Shape example
+1. Assumptions
+2. Measurements
+3. Summary
+4. Workflow characterization
+5. Patterns applied
+6. Patterns rejected
+7. Not verified
+8. Sources
 
-```markdown
-# Verification plan
+Summary counts apply, reject, undecided and unknown verdicts; Operator decisions names
+each undecided card and its unknown conditions. Recommended order appears when priority
+is present. Self-review points use bullets. Instantiation follows Determinism move.
 
-Artifact: {artifact}
+Evidence labels apply to sound and defect entries and holding or not-holding conditions.
+Reason labels apply to not-checked, not-applicable, insufficient-evidence, out-of-scope
+and unknown verdicts. Do not double a final full stop. Assumptions are bullets as
+`topic: statement`; each measurement bullet begins with its id and includes all fields.
+Unavailable-source objects render as fenced JSON inside the uncertainty section.
 
-Scope: {scope}
-
-Corpus revision: `{corpus_revision}`
-
-Corpus tag: `{corpus_tag}`
-
-## Workflow characterization
-
-{workflow_characterization}
-
-## Patterns applied
-
-{patterns_applied}
-
-## Patterns rejected
-
-{patterns_rejected}
-
-## Not verified
-
-{not_verified}
-```
-
-`--output FILE` writes markdown and emits a JSON receipt. `--output -` emits
-`{"text": "<the rendered markdown>"}` on stdout, preserving the structured-output
-contract. Source retrieval uses the same text envelope. Validators and routing emit
-JSON directly. All file outputs use UTF-8 and LF, and reruns are byte-stable.
+Use reference-style card citations `[Title][slug] ([pinned source][slug-src])`.
+Checklist Principles citations become `[Principles][pN]` without changing the record.
+Sources contains each used card and principle-anchor definition once and one corpus
+revision line; the header also retains its revision and tag. Output is deterministic
+and byte-stable. Validation checks structure, not substantive truth.
